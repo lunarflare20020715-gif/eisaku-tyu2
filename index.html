@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中2教科書対応 英作文トレーニング（全90問）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* 赤線ヒントのアニメーション */
+    .jp-red-underline {
+      position: relative;
+      display: inline-block;
+      color: #dc2626;
+      font-weight: 700;
+      background-color: #fef2f2;
+      border-bottom: 3px solid #ef4444;
+      border-radius: 4px 4px 0 0;
+      padding: 0 4px;
+      transition: all 0.2s ease;
+    }
+    .jp-red-underline::after {
+      content: "▲ 次はココ！";
+      position: absolute;
+      left: 50%;
+      bottom: -22px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      white-space: nowrap;
+      background-color: #ef4444;
+      color: #ffffff;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      font-weight: 700;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+      z-index: 10;
+    }
+    /* 不正解時のシェイクアニメーション */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.35s ease-in-out;
+    }
+    /* 正解時のポップアニメーション */
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* キャラクターのふわふわ待機アニメーション */
+    @keyframes floatChar {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .animate-float {
+      animation: floatChar 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- キャラクター画像差し替え用の非表示ファイル入力 -->
+  <input type="file" id="char-file-input" accept="image/*" class="hidden" onchange="handleCharacterImageUpload(event)" />
+
+  <!-- ヘッダー -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <button type="button" onclick="switchMainTab('cover')" class="flex items-center gap-2 text-left hover:opacity-80 transition" title="表紙に戻る">
+        <span class="bg-sky-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg tracking-wide">中2教科書</span>
+        <h1 class="text-base sm:text-lg font-bold text-slate-800">英語の語順マスター</h1>
+      </button>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- 獲得スターバッジ -->
+        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl" title="獲得したスターの合計">
+          <span class="text-sm text-amber-500">★</span>
+          <span class="text-xs font-bold text-amber-900"><span id="header-total-stars">0</span> <span class="text-[10px] font-normal text-amber-700">/ 270</span></span>
+        </div>
+
+        <!-- メインモード切り替えタブ（表紙 / 練習 / 単元・文法） -->
+        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200" role="tablist" aria-label="画面切り替え">
+          <button type="button" id="tab-cover" onclick="switchMainTab('cover')" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-sky-700 shadow-sm">
+            🏠 表紙
+          </button>
+          <button type="button" id="tab-practice" onclick="switchMainTab('practice')" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+            ✏️ 練習
+          </button>
+          <button type="button" id="tab-grammar" onclick="switchMainTab('grammar')" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+            📖 単元・文法
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 表紙ビュー（起動時に表示） -->
+  <section id="view-cover" class="flex-1 max-w-3xl w-full mx-auto px-4 py-6 sm:py-8 flex flex-col justify-center gap-5 animate-pop">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+      <!-- 背景アクセント -->
+      <div class="absolute -top-16 -right-16 w-48 h-48 bg-sky-50 rounded-full pointer-events-none"></div>
+      <div class="absolute -bottom-20 -left-16 w-44 h-44 bg-amber-50 rounded-full pointer-events-none"></div>
+
+      <div class="relative z-10">
+        <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6">
+          <div class="flex-1 text-center sm:text-left">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 text-xs font-bold mb-3">
+              <span>📘 中学2年 教科書対応（Unit 0〜Unit 7・Let's Read 1〜2 全90問）</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">
+              中2教科書の重要文をマスターしよう！<br class="hidden sm:inline" />選択式・英作文トレーニング
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              未来表現・接続詞・不定詞・動名詞・助動詞・比較・受動態まで、中2教科書の重要表現を3段階のブロック分割と赤線ヒントで楽しく身につける練習アプリです。
+            </p>
+          </div>
+
+          <!-- ナビゲーターキャラクター（表紙メイン表示） -->
+          <div class="shrink-0 flex flex-col items-center">
+            <div class="relative bg-gradient-to-b from-sky-50 to-indigo-50/70 border-2 border-sky-200/80 rounded-3xl p-2 shadow-sm w-32 h-36 sm:w-36 sm:h-40 flex items-center justify-center overflow-hidden">
+              <div id="cover-char-container" class="w-full h-full flex items-center justify-center animate-float">
+                <!-- JSでキャラクターSVGまたはアップロード画像を描画 -->
+              </div>
+            </div>
+            <button type="button" onclick="triggerCharacterUpload()" class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 transition shadow-sm" title="手元の画像ファイル（JPG/PNG）に差し替えられます">
+              <span>📷</span>
+              <span>原画に差し替え</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 成績ダッシュボード（習得率＆獲得スターの見える化） -->
+        <div class="grid grid-cols-3 gap-2.5 sm:gap-4 mb-6">
+          <div class="bg-sky-50/80 border border-sky-200 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-between">
+            <span class="text-[11px] font-bold text-sky-800 block mb-0.5">全体習得率</span>
+            <div class="text-xl sm:text-2xl font-bold text-sky-600"><span id="cover-mastery-rate">0</span><span class="text-xs font-semibold text-sky-800 ml-0.5">%</span></div>
+            <div class="w-full bg-sky-200/70 h-1.5 rounded-full overflow-hidden mt-1.5 mb-1">
+              <div id="cover-mastery-bar" class="bg-sky-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <span class="text-[10px] font-semibold text-sky-700"><span id="cover-cleared-count">0</span> / 90問 クリア</span>
+          </div>
+          <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center">
+            <span class="text-[11px] font-bold text-amber-800 block mb-0.5">獲得スター</span>
+            <div class="text-xl sm:text-2xl font-bold text-amber-500">★ <span id="cover-total-stars" class="text-amber-600">0</span><span class="text-xs font-semibold text-amber-800 ml-0.5">/ 270</span></div>
+            <span class="text-[10px] font-semibold text-amber-700 mt-1">1問につき最大3つ</span>
+          </div>
+          <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center">
+            <span class="text-[11px] font-bold text-emerald-800 block mb-0.5">ノーヒント満点</span>
+            <div class="text-xl sm:text-2xl font-bold text-emerald-600"><span id="cover-perfect-count">0</span><span class="text-xs font-semibold text-emerald-800 ml-0.5">問</span></div>
+            <span class="text-[10px] font-semibold text-emerald-700 mt-1">★★★ マスター数</span>
+          </div>
+        </div>
+
+        <!-- コース・設定クイック選択 -->
+        <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200/80 mb-6 flex flex-col gap-4">
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-2">① チャレンジする難易度（文の切り方）</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectCoverLevel('beginner')" id="cover-lvl-beginner" class="cover-lvl-btn p-2.5 sm:p-3 rounded-xl border-2 border-sky-600 bg-white text-left shadow-sm transition">
+                <div class="text-xs sm:text-sm font-bold text-sky-700">初級（塊）</div>
+                <div class="text-[10px] sm:text-xs text-slate-500 mt-0.5">意味の塊・赤線ヒント付</div>
+              </button>
+              <button type="button" onclick="selectCoverLevel('intermediate')" id="cover-lvl-intermediate" class="cover-lvl-btn p-2.5 sm:p-3 rounded-xl border border-slate-200 bg-white text-left hover:border-sky-300 transition">
+                <div class="text-xs sm:text-sm font-bold text-slate-800">中級（要素）</div>
+                <div class="text-[10px] sm:text-xs text-slate-500 mt-0.5">前置詞・助動詞分離（ノーヒント）</div>
+              </button>
+              <button type="button" onclick="selectCoverLevel('advanced')" id="cover-lvl-advanced" class="cover-lvl-btn p-2.5 sm:p-3 rounded-xl border border-slate-200 bg-white text-left hover:border-sky-300 transition">
+                <div class="text-xs sm:text-sm font-bold text-slate-800">上級（単語+罠）</div>
+                <div class="text-[10px] sm:text-xs text-slate-500 mt-0.5">1単語ずつ＋ダミー（ノーヒント）</div>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 border-t border-slate-200/80">
+            <div>
+              <span class="text-xs font-bold text-slate-700">② 出題範囲（授業で習ったパート）</span>
+              <p class="text-[11px] text-slate-500">現在 <strong id="cover-learned-count" class="text-sky-700">90問</strong> が対象になっています</p>
+            </div>
+            <button type="button" onclick="switchMainTab('grammar')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-sky-700 border border-sky-200 hover:bg-sky-50 transition shrink-0">
+              ⚙️ パートを選ぶ・文法を見る
+            </button>
+          </div>
+        </div>
+
+        <!-- スタートボタン -->
+        <button type="button" onclick="startPracticeFromCover()" class="w-full py-3.5 sm:py-4 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-base sm:text-lg shadow-md hover:shadow-lg active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>中2教科書トレーニングを始める</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- メインコンテンツ（英作文練習ビュー） -->
+  <main id="view-practice" class="hidden flex-1 max-w-3xl w-full mx-auto px-4 py-5 flex flex-col gap-4">
+
+    <!-- 習った単元フィルタ＆難易度バー -->
+    <div class="flex flex-col gap-2.5 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
+      <!-- 習った単元のみ出題トグルバー -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
+        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="toggle-only-learned" checked onchange="toggleOnlyLearnedMode()" class="w-4 h-4 accent-sky-600 rounded cursor-pointer" />
+          <span class="text-xs sm:text-sm font-bold text-slate-700">習ったパートだけ出題する</span>
+          <span id="learned-count-badge" class="px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800">90 / 90問</span>
+        </label>
+        <button type="button" onclick="switchMainTab('grammar')" class="text-xs font-bold text-sky-600 hover:text-sky-800 underline underline-offset-2">
+          ⚙️ 習ったパートを選ぶ →
+        </button>
+      </div>
+
+      <!-- パートフィルタ・問題セレクター＆難易度切り替え -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+          <select id="unit-filter" onchange="onFilterChange()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="ALL">全パート (90)</option>
+            <option value="Unit 0">Unit 0 (4)</option>
+            <option value="Unit 1 Part 1">Unit 1 Part 1 (4)</option>
+            <option value="Unit 1 Part 2">Unit 1 Part 2 (3)</option>
+            <option value="Unit 1 Read & Think">Unit 1 Read & Think (6)</option>
+            <option value="Unit 2 Part 1">Unit 2 Part 1 (3)</option>
+            <option value="Unit 2 Part 2">Unit 2 Part 2 (3)</option>
+            <option value="Unit 2 Read & Think">Unit 2 Read & Think (5)</option>
+            <option value="Unit 3 Part 1">Unit 3 Part 1 (3)</option>
+            <option value="Unit 3 Part 2">Unit 3 Part 2 (2)</option>
+            <option value="Unit 3 Read & Think">Unit 3 Read & Think (6)</option>
+            <option value="Let's Read 1">Let's Read 1 (7)</option>
+            <option value="Unit 4 Part 1">Unit 4 Part 1 (3)</option>
+            <option value="Unit 4 Part 2">Unit 4 Part 2 (2)</option>
+            <option value="Unit 4 Read & Think">Unit 4 Read & Think (6)</option>
+            <option value="Unit 5 Part 1">Unit 5 Part 1 (2)</option>
+            <option value="Unit 5 Part 2">Unit 5 Part 2 (3)</option>
+            <option value="Unit 5 Read & Think">Unit 5 Read & Think (6)</option>
+            <option value="Unit 6 Part 1">Unit 6 Part 1 (3)</option>
+            <option value="Unit 6 Part 2">Unit 6 Part 2 (2)</option>
+            <option value="Unit 6 Read & Think">Unit 6 Read & Think (4)</option>
+            <option value="Let's Read 2">Let's Read 2 (5)</option>
+            <option value="Unit 7 Part 1">Unit 7 Part 1 (2)</option>
+            <option value="Unit 7 Part 2">Unit 7 Part 2 (2)</option>
+            <option value="Unit 7 Read & Think">Unit 7 Read & Think (4)</option>
+          </select>
+          <select id="question-select" onchange="onQuestionSelectChange()" class="flex-1 bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-medium rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 truncate">
+            <!-- JSで全90問を動的生成 -->
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- 文の切り方（難易度）切り替えタブ -->
+          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200" role="tablist" aria-label="難易度切り替え">
+            <button type="button" id="btn-level-beginner" onclick="setLevel('beginner')" class="level-tab px-2.5 py-1 text-xs font-bold rounded-lg transition-all bg-sky-600 text-white shadow-sm">
+              初級(塊)
+            </button>
+            <button type="button" id="btn-level-intermediate" onclick="setLevel('intermediate')" class="level-tab px-2.5 py-1 text-xs font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+              中級(要素)
+            </button>
+            <button type="button" id="btn-level-advanced" onclick="setLevel('advanced')" class="level-tab px-2.5 py-1 text-xs font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+              上級(単語+罠)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 出題カード（日本語文 ＋ 赤線ヒント領域 ＋ 文法クイック確認） -->
+    <section class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span id="badge-id" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700">Q.1</span>
+          <span id="badge-unit" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-sky-50 text-sky-700 border border-sky-100">Unit 0 (p.6)</span>
+          <span id="badge-topic" class="text-xs sm:text-sm font-semibold text-slate-600">be動詞・same</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btn-grammar-guide" onclick="toggleInlineGrammarGuide()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition">
+            <span>📖</span>
+            <span>語順の型を見る</span>
+          </button>
+          <span id="stars-display" class="text-amber-400 text-sm tracking-wider font-bold" title="ノーヒント正解で星3つ">★★★</span>
+        </div>
+      </div>
+
+      <!-- インライン文法クイック確認パネル（ボタン押下時のみ展開） -->
+      <div id="inline-grammar-panel" class="hidden mb-4 p-3.5 rounded-xl bg-sky-50/70 border border-sky-200 animate-pop">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <span class="text-xs font-bold text-sky-900">💡 この表現の英語の語順ルール</span>
+          <button type="button" onclick="toggleInlineGrammarGuide()" class="text-xs text-sky-600 hover:text-sky-900 font-bold">✕ 閉じる</button>
+        </div>
+        <p id="inline-grammar-formula" class="text-sm font-bold text-sky-800 bg-white px-3 py-1.5 rounded-lg border border-sky-100 my-1.5"></p>
+        <p id="inline-grammar-desc" class="text-xs text-slate-700 leading-relaxed"></p>
+      </div>
+
+      <!-- 日本語表示エリア（赤線ヒント時にパーツ分割表示） -->
+      <div class="min-h-[68px] flex flex-col justify-center">
+        <p id="japanese-display" class="text-lg sm:text-xl font-bold text-slate-900 leading-loose tracking-wide">
+          <!-- JSで描画 -->
+        </p>
+      </div>
+
+      <!-- ナビゲーターキャラのワンポイント吹き出し -->
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-3">
+        <div id="practice-char-avatar" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sky-50 border border-sky-200 overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+          <!-- JSでミニキャラを描画 -->
+        </div>
+        <div class="flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl px-3.5 py-2 relative">
+          <p id="char-speech-text" class="text-xs sm:text-sm font-medium text-slate-700 leading-snug">
+            英語の語順「誰が ＋ どうする…」を意識してブロックを選んでみよう！
+          </p>
+        </div>
+      </div>
+
+      <!-- 機能語ヒント（インデックスが -1 の場合） -->
+      <div id="special-hint-banner" class="hidden mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-2 animate-pop">
+        <span class="text-base leading-none mt-0.5">💡</span>
+        <div id="special-hint-text" class="font-medium leading-relaxed"></div>
+      </div>
+    </section>
+
+    <!-- 英文解答スロット（ユーザーが並べたブロックが入る場所） -->
+    <section class="bg-white rounded-2xl p-4 sm:p-5 border-2 border-dashed border-slate-300 min-h-[116px] flex flex-col justify-between transition-colors" id="answer-area">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">あなたの英文（タップで取り消し）</span>
+        <span id="progress-counter" class="text-xs font-semibold text-slate-500">0 / 3 パーツ</span>
+      </div>
+
+      <div id="selected-tokens-container" class="flex flex-wrap gap-2 items-center min-h-[44px]">
+        <span class="text-sm text-slate-400 select-none">下の選択肢をタップして英文を組み立てましょう</span>
+      </div>
+    </section>
+
+    <!-- フィードバックメッセージ（不正解時の注意トースト） -->
+    <div id="feedback-toast" class="hidden rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-center transition-all"></div>
+
+    <!-- 選択肢プール -->
+    <section class="bg-slate-100/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold text-slate-500">選択肢ブロック</span>
+        <span id="level-desc" class="text-xs text-slate-500">初級：意味の塊ごとに並べて英語の骨格をつかもう</span>
+      </div>
+
+      <div id="choices-container" class="flex flex-wrap gap-2.5">
+        <!-- JSで選択肢ボタンを生成 -->
+      </div>
+    </section>
+
+    <!-- アクションボタン（ヒント・リセット・次へ） -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-1 pb-6">
+      <div class="flex items-center gap-2">
+        <button type="button" id="btn-hint" onclick="activateHint()" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 active:scale-95 transition shadow-sm">
+          <span>💡</span>
+          <span>次の語順ヒント（赤線）</span>
+        </button>
+        <button type="button" onclick="resetCurrentQuestion()" class="inline-flex items-center gap-1 px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 active:scale-95 transition">
+          <span>↺</span>
+          <span>やり直す</span>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 ml-auto">
+        <button type="button" onclick="prevQuestion()" class="px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 active:scale-95 transition">
+          ← 前へ
+        </button>
+        <button type="button" onclick="nextQuestion()" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-white hover:bg-slate-900 active:scale-95 transition shadow-sm">
+          次の問題 →
+        </button>
+      </div>
+    </div>
+
+    <!-- 正解・解説フィードバックカード -->
+    <section id="result-card" class="hidden rounded-2xl p-5 sm:p-6 bg-emerald-50 border-2 border-emerald-300 shadow-md animate-pop">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shrink-0">✓</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base sm:text-lg font-bold text-emerald-900">正解！</h2>
+              <span id="result-score-pill" class="px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-amber-400 text-amber-950 shadow-sm">★★★ 獲得！</span>
+            </div>
+            <p id="result-rating-text" class="text-xs font-semibold text-emerald-700 mt-0.5">ノーヒント＆ノーミスでマスターしました！</p>
+          </div>
+        </div>
+        <button type="button" onclick="speakAnswer()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-emerald-700 border border-emerald-300 text-xs sm:text-sm font-bold shadow-sm hover:bg-emerald-100 active:scale-95 transition">
+          <span>🔊</span>
+          <span>音声を聞く</span>
+        </button>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-emerald-200 mb-3">
+        <p class="text-xs text-slate-400 font-bold mb-1">完成した英文</p>
+        <p id="result-english" class="text-lg sm:text-xl font-bold text-slate-800"></p>
+      </div>
+
+      <div class="bg-emerald-100/70 rounded-xl p-3.5 text-xs sm:text-sm text-emerald-950 flex items-start gap-2">
+        <span class="font-bold shrink-0">📌 学習ポイント：</span>
+        <span id="result-note"></span>
+      </div>
+
+      <div class="mt-4 flex flex-wrap justify-end gap-2">
+        <button type="button" id="btn-next-level" onclick="upgradeLevelForSameQuestion()" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-white text-sky-700 border border-sky-200 hover:bg-sky-50 transition">
+          同じ文を「中級」で解く
+        </button>
+        <button type="button" onclick="nextQuestion()" class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">
+          次の問題へ進む →
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 単元選択・文法チェックビュー -->
+  <section id="view-grammar" class="hidden flex-1 max-w-3xl w-full mx-auto px-4 py-5 flex flex-col gap-4">
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800">📖 授業進度（パート選択）＆ 語順ガイド</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            習った文を<strong>「☑ 習った（出題ON）」</strong>にしておくと、練習画面でその範囲だけが出題されます。定期テストの範囲に合わせて一括切り替えも可能です。
+          </p>
+        </div>
+      </div>
+
+      <!-- 一括設定ボタン（教科書進度プリセット） -->
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 mt-3 mb-4">
+        <span class="text-xs font-bold text-slate-500 block mb-2">⚡ 教科書の進度で一括設定する：</span>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="applyLearnedPreset('U1_ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-300 transition">
+            Unit 1 まで (17問)
+          </button>
+          <button type="button" onclick="applyLearnedPreset('U2_ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-300 transition">
+            Unit 2 まで (28問)
+          </button>
+          <button type="button" onclick="applyLearnedPreset('U3_LR1')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-300 transition">
+            Unit 3〜Let's Read 1 まで (46問)
+          </button>
+          <button type="button" onclick="applyLearnedPreset('U4_U5')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-300 transition">
+            Unit 4〜5 のみ (22問)
+          </button>
+          <button type="button" onclick="applyLearnedPreset('U6_U7')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-300 transition">
+            Unit 6〜7・Let's Read 2 (22問)
+          </button>
+          <button type="button" onclick="applyLearnedPreset('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white hover:bg-sky-700 transition">
+            すべてONにする (90問)
+          </button>
+          <button type="button" onclick="applyLearnedPreset('NONE')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-500 hover:bg-rose-50 hover:text-rose-700 transition">
+            すべてOFFにする
+          </button>
+        </div>
+      </div>
+
+      <!-- パート表示フィルタボタン -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="filterGrammarCards('ALL')" id="gfilter-ALL" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white">すべて (90)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 0')" id="gfilter-Unit 0" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 0 (4)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 1')" id="gfilter-Unit 1" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 1 (13)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 2')" id="gfilter-Unit 2" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 2 (11)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 3')" id="gfilter-Unit 3" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 3 (11)</button>
+          <button type="button" onclick="filterGrammarCards('Let\'s Read 1')" id="gfilter-Let's Read 1" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Let's Read 1 (7)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 4')" id="gfilter-Unit 4" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 4 (11)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 5')" id="gfilter-Unit 5" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 5 (11)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 6')" id="gfilter-Unit 6" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 6 (9)</button>
+          <button type="button" onclick="filterGrammarCards('Let\'s Read 2')" id="gfilter-Let's Read 2" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Let's Read 2 (5)</button>
+          <button type="button" onclick="filterGrammarCards('Unit 7')" id="gfilter-Unit 7" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 7 (8)</button>
+        </div>
+        <button type="button" onclick="switchMainTab('practice')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">
+          選択した範囲で練習する →
+        </button>
+      </div>
+    </div>
+
+    <div id="grammar-cards-list" class="flex flex-col gap-3 pb-8">
+      <!-- JSで文法カード一覧を生成 -->
+    </div>
+  </section>
+
+  <script>
+    // 中2教科書（Unit 0 〜 Unit 7・Let's Read 1〜2）全90問マスターデータ
+    const QUESTIONS = [
+      { id: 1, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "be動詞・same", jp: "私たちは同じクラスです！", jpParts: ["私たちは", "同じクラス", "です！"], en: "We are in the same class!", beginner: ["We", "are", "in the same class!"], idxMap: [0, 2, 1], intermediate: ["We", "are", "in", "the", "same", "class!"], advanced: ["We", "are", "in", "the", "same", "class!"], dummies: ["is", "am", "at", "on"], note: "「〜に所属している（同じクラスだ）」は in the same class で表します。" },
+      { id: 2, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "過去形・with 人", jp: "私は家族といっしょに札幌に行きました。", jpParts: ["私は", "家族といっしょに", "札幌に", "行きました。"], en: "I went to Sapporo with my family.", beginner: ["I", "went", "to Sapporo", "with my family."], idxMap: [0, 3, 2, 1], intermediate: ["I", "went", "to", "Sapporo", "with", "my", "family."], advanced: ["I", "went", "to", "Sapporo", "with", "my", "family."], dummies: ["go", "goes", "at", "by"], note: "「誰が（I）＋ どうした（went）＋ どこへ（to Sapporo）＋ 誰と（with my family）」の基本語順です。" },
+      { id: 3, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "動詞＋動名詞（enjoy 〜ing）", jp: "私は弟とスキーをして楽しみました。", jpParts: ["私は", "弟と", "スキーをして", "楽しみました。"], en: "I enjoyed skiing with my brother.", beginner: ["I", "enjoyed", "skiing", "with my brother."], idxMap: [0, 3, 2, 1], intermediate: ["I", "enjoyed", "skiing", "with", "my", "brother."], advanced: ["I", "enjoyed", "skiing", "with", "my", "brother."], dummies: ["enjoy", "to ski", "ski", "by"], note: "enjoy の後ろは to不定詞ではなく動名詞（skiing）を置きます。" },
+      { id: 4, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "過去形（had / ate）", jp: "実は、私は家族と札幌ラーメンを食べました。", jpParts: ["実は、", "私は", "家族と", "札幌ラーメンを", "食べました。"], en: "Actually, I had Sapporo ramen with my family.", beginner: ["Actually,", "I", "had", "Sapporo ramen", "with my family."], idxMap: [0, 1, 4, 3, 2], intermediate: ["Actually,", "I", "had", "Sapporo", "ramen", "with", "my", "family."], advanced: ["Actually,", "I", "had", "Sapporo", "ramen", "with", "my", "family."], dummies: ["have", "has", "eat", "by"], note: "「（食事を）食べる」は ate のほかに had もよく使われます。" },
+      { id: 5, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 1", unitLabel: "Unit 1 Part 1 (p.10)", topic: "未来（be going to）・leave for", jp: "私は明日の朝シンガポールに出発する予定です。", jpParts: ["私は", "明日の朝", "シンガポールに", "出発する予定です。"], en: "I am going to leave for Singapore tomorrow morning.", beginner: ["I", "am going to leave", "for Singapore", "tomorrow morning."], idxMap: [0, 3, 2, 1], intermediate: ["I", "am", "going to", "leave", "for", "Singapore", "tomorrow", "morning."], advanced: ["I", "am", "going", "to", "leave", "for", "Singapore", "tomorrow", "morning."], dummies: ["will", "left", "to", "at"], note: "leave for ＋ 場所 で「（場所）に向かって出発する」という意味になります。" },
+      { id: 6, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 1", unitLabel: "Unit 1 Part 1 (p.10)", topic: "熟語（show 人 around 場所）", jp: "あなたは私に街を案内してくれる予定です。", jpParts: ["あなたは", "私に", "街を", "案内してくれる予定です。"], en: "You are going to show me around the city.", beginner: ["You", "are going to show", "me", "around the city."], idxMap: [0, 3, 1, 2], intermediate: ["You", "are", "going to", "show", "me", "around", "the", "city."], advanced: ["You", "are", "going", "to", "show", "me", "around", "the", "city."], dummies: ["is", "showed", "I", "in"], note: "show ＋ 人 ＋ around ＋ 場所 で「人に場所を案内して回る」を表します。" },
+      { id: 7, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 1", unitLabel: "Unit 1 Part 1 (p.10)", topic: "未来（be going to・疑問文）", jp: "あなたは明日シンガポールを訪れるつもりですか。", jpParts: ["あなたは", "明日", "シンガポールを", "訪れるつもりですか。"], en: "Are you going to visit Singapore tomorrow?", beginner: ["Are", "you", "going to visit", "Singapore", "tomorrow?"], idxMap: [3, 0, 3, 2, 1], intermediate: ["Are", "you", "going to", "visit", "Singapore", "tomorrow?"], advanced: ["Are", "you", "going", "to", "visit", "Singapore", "tomorrow?"], dummies: ["Do", "Will", "visited", "to"], note: "be going to の疑問文は be動詞（Are）を主語の前に出します。" },
+      { id: 8, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 1", unitLabel: "Unit 1 Part 1 (p.10)", topic: "疑問詞＋be going to", jp: "私たちは空港のどこで会いましょうか。", jpParts: ["私たちは", "空港の", "どこで", "会いましょうか。"], en: "Where are we going to meet in the airport?", beginner: ["Where", "are", "we", "going to meet", "in the airport?"], idxMap: [2, 3, 0, 3, 1], intermediate: ["Where", "are", "we", "going to", "meet", "in", "the", "airport?"], advanced: ["Where", "are", "we", "going", "to", "meet", "in", "the", "airport?"], dummies: ["What", "do", "met", "at"], note: "疑問詞 Where を文頭に置き、後ろを「are we going to ＋ 動詞の原形」にします。" },
+      { id: 9, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 2", unitLabel: "Unit 1 Part 2 (p.11)", topic: "熟語（far from 〜）", jp: "その公園はここから遠いですか。", jpParts: ["その公園は", "ここから", "遠いですか。"], en: "Is the park far from here?", beginner: ["Is", "the park", "far from", "here?"], idxMap: [2, 0, 2, 1], intermediate: ["Is", "the", "park", "far", "from", "here?"], advanced: ["Is", "the", "park", "far", "from", "here?"], dummies: ["Does", "Are", "to", "near"], note: "far from 〜（〜から遠い）を使った be動詞の疑問文です。" },
+      { id: 10, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 2", unitLabel: "Unit 1 Part 2 (p.11)", topic: "助動詞（will・予測）", jp: "あなたはすぐにマーライオンが見えるでしょう。", jpParts: ["あなたは", "すぐに", "マーライオンが", "見えるでしょう。"], en: "You will see the Merlion soon.", beginner: ["You", "will see", "the Merlion", "soon."], idxMap: [0, 3, 2, 1], intermediate: ["You", "will", "see", "the", "Merlion", "soon."], advanced: ["You", "will", "see", "the", "Merlion", "soon."], dummies: ["are", "saw", "sees", "a"], note: "will ＋ 動詞の原形（see）で「〜でしょう」という未来の予測を表します。" },
+      { id: 11, unitMajor: "Unit 1", unitGroup: "Unit 1 Part 2", unitLabel: "Unit 1 Part 2 (p.11)", topic: "助動詞（will・意志）・熟語", jp: "私が予約をしましょう。", jpParts: ["私が", "予約を", "しましょう。"], en: "I will make a reservation.", beginner: ["I", "will make", "a reservation."], idxMap: [0, 2, 1], intermediate: ["I", "will", "make", "a", "reservation."], advanced: ["I", "will", "make", "a", "reservation."], dummies: ["am", "made", "do", "take"], note: "その場で決めた意志を表す will と make a reservation（予約をする）の組み合わせです。" },
+      { id: 12, unitMajor: "Unit 1", unitGroup: "Unit 1 Read & Think", unitLabel: "Unit 1 Read & Think 1 (p.12)", topic: "高さ・重さの表現（tall / weigh）", jp: "それは高さが8.6メートルで、重さは70トンあります。", jpParts: ["それは", "高さが8.6メートルで、", "重さは70トンあります。"], en: "It is 8.6 meters tall, and it weighs 70 tons.", beginner: ["It", "is 8.6 meters tall,", "and", "it", "weighs 70 tons."], idxMap: [0, 1, 1, 0, 2], intermediate: ["It", "is", "8.6", "meters", "tall,", "and", "it", "weighs", "70", "tons."], advanced: ["It", "is", "8.6", "meters", "tall,", "and", "it", "weighs", "70", "tons."], dummies: ["high", "weigh", "weighed", "ton"], note: "「数字＋単位＋tall」で高さ、動詞 weigh で「〜の重さがある」を表します。" },
+      { id: 13, unitMajor: "Unit 1", unitGroup: "Unit 1 Read & Think", unitLabel: "Unit 1 Read & Think 1 (p.12)", topic: "SVOO（show ＋ 人 ＋ もの）", jp: "私は学校であなたにそれの写真を何枚か見せますね。", jpParts: ["私は", "学校で", "あなたに", "それの写真を何枚か", "見せますね。"], en: "I will show you some pictures of it at school.", beginner: ["I", "will show", "you", "some pictures of it", "at school."], idxMap: [0, 4, 2, 3, 1], intermediate: ["I", "will", "show", "you", "some", "pictures", "of", "it", "at", "school."], advanced: ["I", "will", "show", "you", "some", "pictures", "of", "it", "at", "school."], dummies: ["showed", "your", "picture", "in"], note: "show ＋ 人（you）＋ もの（some pictures of it）の語順を作る重要文です。" },
+      { id: 14, unitMajor: "Unit 1", unitGroup: "Unit 1 Read & Think", unitLabel: "Unit 1 Read & Think 1 (p.12)", topic: "熟語（communicate with 〜）", jp: "だから、私は彼と英語で意思の疎通ができます。", jpParts: ["だから、", "私は", "彼と", "英語で", "意思の疎通ができます。"], en: "So, I can communicate with him in English.", beginner: ["So,", "I", "can communicate", "with him", "in English."], idxMap: [0, 1, 4, 2, 3], intermediate: ["So,", "I", "can", "communicate", "with", "him", "in", "English."], advanced: ["So,", "I", "can", "communicate", "with", "him", "in", "English."], dummies: ["communicates", "to", "he", "by"], note: "communicate with 人（人と意思の疎通をする）と in 言語（〜語で）の組み合わせです。" },
+      { id: 15, unitMajor: "Unit 1", unitGroup: "Unit 1 Read & Think", unitLabel: "Unit 1 Read & Think 2 (p.14)", topic: "構文（one of the ＋ 複数名詞）", jp: "その絵の1つに名探偵コナンが写っていました。", jpParts: ["その絵の1つに", "名探偵コナンが", "写っていました。"], en: "One of the paintings showed Detective Conan.", beginner: ["One of the paintings", "showed", "Detective Conan."], idxMap: [0, 2, 1], intermediate: ["One", "of", "the", "paintings", "showed", "Detective", "Conan."], advanced: ["One", "of", "the", "paintings", "showed", "Detective", "Conan."], dummies: ["painting", "show", "shows", "a"], note: "one of the ＋ 複数名詞（paintings）が主語になっています。" },
+      { id: 16, unitMajor: "Unit 1", unitGroup: "Unit 1 Read & Think", unitLabel: "Unit 1 Read & Think 2 (p.14)", topic: "SVOC（call ＋ A ＋ B）", jp: "人々はこの区域をリトル・インディアと呼びます。", jpParts: ["人々は", "この区域を", "リトル・インディアと", "呼びます。"], en: "People call this area Little India.", beginner: ["People", "call", "this area", "Little India."], idxMap: [0, 3, 1, 2], intermediate: ["People", "call", "this", "area", "Little", "India."], advanced: ["People", "call", "this", "area", "Little", "India."], dummies: ["calls", "these", "to", "as"], note: "「call ＋ A（this area）＋ B（Little India）」で「AをBと呼ぶ」を表します。" },
+      { id: 17, unitMajor: "Unit 1", unitGroup: "Unit 1 Read & Think", unitLabel: "Unit 1 Read & Think 2 (p.14)", topic: "SVOOの書き換え（buy もの for 人）", jp: "私は家族におみやげをいくつか買いました。", jpParts: ["私は", "家族に", "おみやげをいくつか", "買いました。"], en: "I bought some gifts for my family.", beginner: ["I", "bought", "some gifts", "for my family."], idxMap: [0, 3, 2, 1], intermediate: ["I", "bought", "some", "gifts", "for", "my", "family."], advanced: ["I", "bought", "some", "gifts", "for", "my", "family."], dummies: ["buy", "gift", "to", "at"], note: "buy ＋ もの ＋ for ＋ 人 で「人のためにものを買う」を表します（give は to、buy は for）。" },
+      { id: 18, unitMajor: "Unit 2", unitGroup: "Unit 2 Part 1", unitLabel: "Unit 2 Part 1 (p.39)", topic: "接続詞（when 〜）", jp: "私がラーメン店に行くとき、私はいつもとんこつラーメンを注文します。", jpParts: ["私が", "ラーメン店に", "行くとき、", "私は", "いつも", "とんこつラーメンを", "注文します。"], en: "When I go to a ramen restaurant, I always order tonkotsu ramen.", beginner: ["When", "I", "go to a ramen restaurant,", "I", "always order", "tonkotsu ramen."], idxMap: [2, 0, 1, 3, 4, 5], intermediate: ["When", "I", "go", "to", "a", "ramen", "restaurant,", "I", "always", "order", "tonkotsu", "ramen."], advanced: ["When", "I", "go", "to", "a", "ramen", "restaurant,", "I", "always", "order", "tonkotsu", "ramen."], dummies: ["If", "goes", "went", "orders"], note: "接続詞 When で始まる文を前に置くときは、後ろにカンマ（,）をつけます。" },
+      { id: 19, unitMajor: "Unit 2", unitGroup: "Unit 2 Part 1", unitLabel: "Unit 2 Part 1 (p.39)", topic: "There are ＋ 複数名詞", jp: "実際、日本にはさまざまなラーメンの味があります。", jpParts: ["実際、", "日本には", "さまざまなラーメンの味が", "あります。"], en: "Actually, there are various ramen flavors in Japan.", beginner: ["Actually,", "there are", "various ramen flavors", "in Japan."], idxMap: [0, 3, 2, 1], intermediate: ["Actually,", "there", "are", "various", "ramen", "flavors", "in", "Japan."], advanced: ["Actually,", "there", "are", "various", "ramen", "flavors", "in", "Japan."], dummies: ["is", "flavor", "at", "on"], note: "主語（various ramen flavors）が複数なので There are を使います。" },
+      { id: 20, unitMajor: "Unit 2", unitGroup: "Unit 2 Part 1", unitLabel: "Unit 2 Part 1 (p.39)", topic: "接続詞（when が後ろにくる語順）", jp: "私は自由な時間があるとき、よく音楽を聴きます。", jpParts: ["私は", "自由な時間があるとき、", "よく", "音楽を聴きます。"], en: "I often listen to music when I have free time.", beginner: ["I", "often listen to", "music", "when", "I have free time."], idxMap: [0, 3, 3, 1, 1], intermediate: ["I", "often", "listen", "to", "music", "when", "I", "have", "free", "time."], advanced: ["I", "often", "listen", "to", "music", "when", "I", "have", "free", "time."], dummies: ["listens", "at", "if", "had"], note: "when 節を文の後半に置くときはカンマ（,）は不要です。" },
+      { id: 21, unitMajor: "Unit 2", unitGroup: "Unit 2 Part 2", unitLabel: "Unit 2 Part 2 (p.40)", topic: "熟語（be famous for 〜）", jp: "それはおいしいみそラーメンで有名です。", jpParts: ["それは", "おいしいみそラーメンで", "有名です。"], en: "It is famous for delicious miso ramen.", beginner: ["It", "is famous for", "delicious miso ramen."], idxMap: [0, 2, 1], intermediate: ["It", "is", "famous", "for", "delicious", "miso", "ramen."], advanced: ["It", "is", "famous", "for", "delicious", "miso", "ramen."], dummies: ["are", "of", "to", "at"], note: "be famous for 〜（〜で有名である）を使った定番表現です。" },
+      { id: 22, unitMajor: "Unit 2", unitGroup: "Unit 2 Part 2", unitLabel: "Unit 2 Part 2 (p.40)", topic: "接続詞（if 〜）", jp: "もし時間があれば、あなたは私たちといっしょに来ることができます。", jpParts: ["もし", "時間があれば、", "あなたは", "私たちといっしょに", "来ることができます。"], en: "If you have time, you can come with us.", beginner: ["If", "you have time,", "you", "can come", "with us."], idxMap: [0, 1, 2, 4, 3], intermediate: ["If", "you", "have", "time,", "you", "can", "come", "with", "us."], advanced: ["If", "you", "have", "time,", "you", "can", "come", "with", "us."], dummies: ["When", "had", "came", "we"], note: "条件を表す接続詞 If（もし〜ならば）を使った文です。" },
+      { id: 23, unitMajor: "Unit 2", unitGroup: "Unit 2 Part 2", unitLabel: "Unit 2 Part 2 (p.40)", topic: "熟語（add A to B）", jp: "もしほしければ、あなたはラーメンに卵を追加できます。", jpParts: ["もしほしければ、", "あなたは", "ラーメンに", "卵を", "追加できます。"], en: "You can add an egg to your ramen if you want.", beginner: ["You", "can add", "an egg", "to your ramen", "if you want."], idxMap: [1, 4, 3, 2, 0], intermediate: ["You", "can", "add", "an", "egg", "to", "your", "ramen", "if", "you", "want."], advanced: ["You", "can", "add", "an", "egg", "to", "your", "ramen", "if", "you", "want."], dummies: ["adds", "a", "for", "when"], note: "add A to B（AをBに加える）の後ろに if you want を続けています。" },
+      { id: 24, unitMajor: "Unit 2", unitGroup: "Unit 2 Read & Think", unitLabel: "Unit 2 Read & Think 1 (p.42)", topic: "SVC（stay ＋ 形容詞）", jp: "スープが濃いので、それは温かいままです。", jpParts: ["スープが", "濃いので、", "それは", "温かいままです。"], en: "It stays warm because the soup is thick.", beginner: ["It", "stays warm", "because", "the soup is thick."], idxMap: [2, 3, 1, 0], intermediate: ["It", "stays", "warm", "because", "the", "soup", "is", "thick."], advanced: ["It", "stays", "warm", "because", "the", "soup", "is", "thick."], dummies: ["stay", "warmly", "so", "are"], note: "stay ＋ 形容詞（warm）で「〜のままでいる」を表します。" },
+      { id: 25, unitMajor: "Unit 2", unitGroup: "Unit 2 Read & Think", unitLabel: "Unit 2 Read & Think 1 (p.42)", topic: "前置詞（with：手段・材料）", jp: "地元の製麺業者はその地域の山から流れてくる水を使って麺を作ります。", jpParts: ["地元の製麺業者は", "その地域の山から流れてくる水を使って", "麺を", "作ります。"], en: "Local noodle manufacturers make the noodles with water from mountains in the area.", beginner: ["Local noodle manufacturers", "make", "the noodles", "with water from mountains in the area."], idxMap: [0, 3, 2, 1], intermediate: ["Local", "noodle", "manufacturers", "make", "the", "noodles", "with", "water", "from", "mountains", "in", "the", "area."], advanced: ["Local", "noodle", "manufacturers", "make", "the", "noodles", "with", "water", "from", "mountains", "in", "the", "area."], dummies: ["makes", "by", "for", "noodle"], note: "「〜を使って（材料・道具）」を表す前置詞 with を使った文です。" },
+      { id: 26, unitMajor: "Unit 2", unitGroup: "Unit 2 Read & Think", unitLabel: "Unit 2 Read & Think 2 (p.46)", topic: "熟語（come from 〜）", jp: "ラーメンは中国発祥ですが、今ではとても人気のある日本の食べ物です。", jpParts: ["ラーメンは", "中国発祥ですが、", "今では", "とても人気のある日本の食べ物です。"], en: "Ramen came from China, and now it is a very popular Japanese food.", beginner: ["Ramen", "came from China,", "and", "now", "it is", "a very popular Japanese food."], idxMap: [0, 1, 1, 2, 3, 3], intermediate: ["Ramen", "came", "from", "China,", "and", "now", "it", "is", "a", "very", "popular", "Japanese", "food."], advanced: ["Ramen", "came", "from", "China,", "and", "now", "it", "is", "a", "very", "popular", "Japanese", "food."], dummies: ["come", "of", "but", "are"], note: "come from 〜（〜出身である・〜発祥である）の過去形 came from です。" },
+      { id: 27, unitMajor: "Unit 2", unitGroup: "Unit 2 Read & Think", unitLabel: "Unit 2 Read & Think 2 (p.46)", topic: "熟語（name A after B）", jp: "彼はその料理をイタリアのナポリにちなんでナポリタンと名づけました。", jpParts: ["彼は", "その料理を", "イタリアのナポリにちなんで", "ナポリタンと", "名づけました。"], en: "He named the dish Napolitan after Naples in Italy.", beginner: ["He", "named", "the dish", "Napolitan", "after Naples in Italy."], idxMap: [0, 4, 1, 3, 2], intermediate: ["He", "named", "the", "dish", "Napolitan", "after", "Naples", "in", "Italy."], advanced: ["He", "named", "the", "dish", "Napolitan", "after", "Naples", "in", "Italy."], dummies: ["name", "called", "for", "from"], note: "name A after B（BにちなんでAと名づける）を使った表現です。" },
+      { id: 28, unitMajor: "Unit 2", unitGroup: "Unit 2 Read & Think", unitLabel: "Unit 2 Read & Think 2 (p.46)", topic: "接続詞（thatの省略）", jp: "私は食べ物が世界中を旅してそれぞれの場所で変化すると思います。", jpParts: ["私は", "食べ物が", "世界中を旅して", "それぞれの場所で変化する", "と思います。"], en: "I think food travels around the world and changes in each place.", beginner: ["I", "think", "food", "travels around the world", "and", "changes in each place."], idxMap: [0, 4, 1, 2, 3, 3], intermediate: ["I", "think", "food", "travels", "around", "the", "world", "and", "changes", "in", "each", "place."], advanced: ["I", "think", "food", "travels", "around", "the", "world", "and", "changes", "in", "each", "place."], dummies: ["thinks", "travel", "change", "at"], note: "I think の後ろで主語 food（単数）に対して動詞が travels と changes の2つ並んでいます。" },
+      { id: 29, unitMajor: "Unit 3", unitGroup: "Unit 3 Part 1", unitLabel: "Unit 3 Part 1 (p.60)", topic: "形容詞（own：自分自身の）", jp: "あなた自身の名札を作りなさい。", jpParts: ["あなた自身の", "名札を", "作りなさい。"], en: "Make your own name tag.", beginner: ["Make", "your own", "name tag."], idxMap: [2, 0, 1], intermediate: ["Make", "your", "own", "name", "tag."], advanced: ["Make", "your", "own", "name", "tag."], dummies: ["Makes", "you", "my", "a"], note: "your own 〜 で「あなた自身の〜」を強調する命令文です。" },
+      { id: 30, unitMajor: "Unit 3", unitGroup: "Unit 3 Part 1", unitLabel: "Unit 3 Part 1 (p.60)", topic: "不定詞（副詞的用法・目的）", jp: "子供たちと遊ぶために運動ぐつを持ってきなさい。", jpParts: ["子供たちと", "遊ぶために", "運動ぐつを", "持ってきなさい。"], en: "Bring your sports shoes to play with the children.", beginner: ["Bring", "your sports shoes", "to play", "with the children."], idxMap: [3, 2, 1, 0], intermediate: ["Bring", "your", "sports", "shoes", "to", "play", "with", "the", "children."], advanced: ["Bring", "your", "sports", "shoes", "to", "play", "with", "the", "children."], dummies: ["Brings", "playing", "for", "child"], note: "命令文 Bring 〜 の後ろに目的を表す「to ＋ 動詞の原形（to play）」を置きます。" },
+      { id: 31, unitMajor: "Unit 3", unitGroup: "Unit 3 Part 1", unitLabel: "Unit 3 Part 1 (p.60)", topic: "熟語（take A home with you）", jp: "ごみは家に持ち帰りなさい。", jpParts: ["ごみは", "家に", "持ち帰りなさい。"], en: "Take your garbage home with you.", beginner: ["Take", "your garbage", "home", "with you."], idxMap: [2, 0, 1, 2], intermediate: ["Take", "your", "garbage", "home", "with", "you."], advanced: ["Take", "your", "garbage", "home", "with", "you."], dummies: ["Takes", "to home", "by", "your"], note: "take もの with 人 で「（人が）ものを携えていく・持ち帰る」を表します。" },
+      { id: 32, unitMajor: "Unit 3", unitGroup: "Unit 3 Part 2", unitLabel: "Unit 3 Part 2 (p.62)", topic: "不定詞（名詞的用法・need to）", jp: "私は子供たちに英語の絵本を読む必要があります。", jpParts: ["私は", "子供たちに", "英語の絵本を", "読む必要があります。"], en: "I need to read an English picture book to the children.", beginner: ["I", "need to read", "an English picture book", "to the children."], idxMap: [0, 3, 2, 1], intermediate: ["I", "need", "to", "read", "an", "English", "picture", "book", "to", "the", "children."], advanced: ["I", "need", "to", "read", "an", "English", "picture", "book", "to", "the", "children."], dummies: ["needs", "reading", "a", "for"], note: "need to ＋ 動詞の原形 で「〜する必要がある」を表します。" },
+      { id: 33, unitMajor: "Unit 3", unitGroup: "Unit 3 Part 2", unitLabel: "Unit 3 Part 2 (p.62)", topic: "不定詞（副詞的用法・感情の原因）", jp: "私はそれを聞いてうれしいです。", jpParts: ["私は", "それを聞いて", "うれしいです。"], en: "I am happy to hear that.", beginner: ["I", "am", "happy", "to hear that."], idxMap: [0, 2, 2, 1], intermediate: ["I", "am", "happy", "to", "hear", "that."], advanced: ["I", "am", "happy", "to", "hear", "that."], dummies: ["is", "happily", "hearing", "this"], note: "感情を表す形容詞（happy）の後ろに「to ＋ 動詞の原形」を置いて原因を表します。" },
+      { id: 34, unitMajor: "Unit 3", unitGroup: "Unit 3 Read & Think", unitLabel: "Unit 3 Read & Think 1 (p.64)", topic: "不定詞（形容詞的用法）", jp: "ここに見るべきかわいい絵がいくつかあります。", jpParts: ["ここに", "見るべき", "かわいい絵がいくつか", "あります。"], en: "Here are some pretty pictures to look at.", beginner: ["Here are", "some pretty pictures", "to look at."], idxMap: [3, 2, 1], intermediate: ["Here", "are", "some", "pretty", "pictures", "to", "look", "at."], advanced: ["Here", "are", "some", "pretty", "pictures", "to", "look", "at."], dummies: ["is", "picture", "looking", "for"], note: "名詞（some pretty pictures）の後ろに「to ＋ 動詞の原形（to look at）」を置いて修飾します。" },
+      { id: 35, unitMajor: "Unit 3", unitGroup: "Unit 3 Read & Think", unitLabel: "Unit 3 Read & Think 1 (p.64)", topic: "SVOO（teach 人 もの）・不定詞", jp: "この本は私に覚えておくべき大切なことを教えてくれました。", jpParts: ["この本は", "私に", "覚えておくべき", "大切なことを", "教えてくれました。"], en: "This book taught me important things to remember.", beginner: ["This book", "taught", "me", "important things", "to remember."], idxMap: [0, 4, 1, 3, 2], intermediate: ["This", "book", "taught", "me", "important", "things", "to", "remember."], advanced: ["This", "book", "taught", "me", "important", "things", "to", "remember."], dummies: ["teach", "I", "thing", "remembering"], note: "teach ＋ 人（me）＋ もの（important things to remember）の語順です。" },
+      { id: 36, unitMajor: "Unit 3", unitGroup: "Unit 3 Read & Think", unitLabel: "Unit 3 Read & Think 1 (p.64)", topic: "不定詞（名詞的用法・start to）", jp: "彼は食べ物をさがし始めました。", jpParts: ["彼は", "食べ物を", "さがし始めました。"], en: "He started to look for some food.", beginner: ["He", "started to look for", "some food."], idxMap: [0, 2, 1], intermediate: ["He", "started", "to", "look", "for", "some", "food."], advanced: ["He", "started", "to", "look", "for", "some", "food."], dummies: ["start", "looking", "at", "foods"], note: "start to ＋ 動詞の原形（〜し始める）と look for（〜をさがす）の組み合わせです。" },
+      { id: 37, unitMajor: "Unit 3", unitGroup: "Unit 3 Read & Think", unitLabel: "Unit 3 Read & Think 2 (p.68)", topic: "不定詞（名詞的用法・主語 It is ... to）", jp: "話しかけるときに子供たちの顔を見ることが大切です。", jpParts: ["話しかけるときに", "子供たちの顔を", "見ることが", "大切です。"], en: "It is important to look at the children's faces when I talk.", beginner: ["It", "is", "important", "to look at", "the children's faces", "when I talk."], idxMap: [-1, 3, 3, 2, 1, 0], intermediate: ["It", "is", "important", "to", "look", "at", "the", "children's", "faces", "when", "I", "talk."], advanced: ["It", "is", "important", "to", "look", "at", "the", "children's", "faces", "when", "I", "talk."], dummies: ["This", "looking", "for", "child's"], note: "形式主語 It（インデックス-1）を文頭に置き、「to ＋ 動詞の原形」の塊を後ろに置きます。" },
+      { id: 38, unitMajor: "Unit 3", unitGroup: "Unit 3 Read & Think", unitLabel: "Unit 3 Read & Think 2 (p.68)", topic: "不定詞（名詞的用法・try to）", jp: "子供たちはそれらを理解しようとしました。", jpParts: ["子供たちは", "それらを", "理解しようとしました。"], en: "The children tried to understand them.", beginner: ["The children", "tried to understand", "them."], idxMap: [0, 2, 1], intermediate: ["The", "children", "tried", "to", "understand", "them."], advanced: ["The", "children", "tried", "to", "understand", "them."], dummies: ["try", "trying", "they", "their"], note: "try to ＋ 動詞の原形（〜しようと試みる）の過去形 tried to です。" },
+      { id: 39, unitMajor: "Unit 3", unitGroup: "Unit 3 Read & Think", unitLabel: "Unit 3 Read & Think 2 (p.68)", topic: "熟語（from now on / out loud）", jp: "これからは、私は毎日大きな声で音読します。", jpParts: ["これからは、", "私は", "毎日", "大きな声で", "音読します。"], en: "From now on, I am going to read out loud every day.", beginner: ["From now on,", "I", "am going to read", "out loud", "every day."], idxMap: [0, 1, 4, 3, 2], intermediate: ["From", "now", "on,", "I", "am", "going to", "read", "out", "loud", "every", "day."], advanced: ["From", "now", "on,", "I", "am", "going", "to", "read", "out", "loud", "every", "day."], dummies: ["In", "will", "loudly", "at"], note: "from now on（これからは）と read out loud（音読する）を使った表現です。" },
+      { id: 40, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.86)", topic: "接続詞（when）・need to", jp: "私たちは時刻を知る必要があるとき、置き時計か腕時計を見ます。", jpParts: ["私たちは", "時刻を知る必要があるとき、", "置き時計か腕時計を", "見ます。"], en: "When we need to see the time, we look at clocks or watches.", beginner: ["When", "we need to see the time,", "we", "look at", "clocks or watches."], idxMap: [1, 1, 0, 3, 2], intermediate: ["When", "we", "need", "to", "see", "the", "time,", "we", "look", "at", "clocks", "or", "watches."], advanced: ["When", "we", "need", "to", "see", "the", "time,", "we", "look", "at", "clocks", "or", "watches."], dummies: ["If", "needs", "looks", "and"], note: "When で始まる節を文頭に置き、カンマ（,）で区切って主文を続けます。" },
+      { id: 41, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.86)", topic: "不定詞（副詞的用法・目的）", jp: "古代の人々は時刻を知るために自然を利用しました。", jpParts: ["古代の人々は", "時刻を知るために", "自然を", "利用しました。"], en: "Ancient people used nature to read the time.", beginner: ["Ancient people", "used", "nature", "to read the time."], idxMap: [0, 3, 2, 1], intermediate: ["Ancient", "people", "used", "nature", "to", "read", "the", "time."], advanced: ["Ancient", "people", "used", "nature", "to", "read", "the", "time."], dummies: ["use", "using", "reading", "for"], note: "「自然を利用した（used nature）」の後ろに目的（to read the time）をつなげます。" },
+      { id: 42, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.86)", topic: "SVOO（tell ＋ 人 ＋ もの）", jp: "その影が彼らに時刻を告げました。", jpParts: ["その影が", "彼らに", "時刻を", "告げました。"], en: "The shadows told them the time.", beginner: ["The shadows", "told", "them", "the time."], idxMap: [0, 3, 1, 2], intermediate: ["The", "shadows", "told", "them", "the", "time."], advanced: ["The", "shadows", "told", "them", "the", "time."], dummies: ["tell", "tells", "they", "to"], note: "tell ＋ 人（them）＋ もの（the time）で「人に時刻を教える・告げる」を表します。" },
+      { id: 43, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.88)", topic: "前置詞＋動名詞（without it）", jp: "約3,500年前、エジプト人は太陽を使わずに時間をはかることを始めました。", jpParts: ["約3,500年前、", "エジプト人は", "太陽を使わずに", "時間をはかることを", "始めました。"], en: "About 3,500 years ago, Egyptians started to measure time without it.", beginner: ["About 3,500 years ago,", "Egyptians", "started", "to measure time", "without it."], idxMap: [0, 1, 4, 3, 2], intermediate: ["About", "3,500", "years", "ago,", "Egyptians", "started", "to", "measure", "time", "without", "it."], advanced: ["About", "3,500", "years", "ago,", "Egyptians", "started", "to", "measure", "time", "without", "it."], dummies: ["start", "measuring", "with", "them"], note: "without it（それ＝太陽なしで）を文末に置いた文です。" },
+      { id: 44, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.90)", topic: "不定詞（副詞的用法・形容詞を修飾）", jp: "このような時計は動かすのが困難でした。", jpParts: ["このような時計は", "動かすのが", "困難でした。"], en: "These clocks were difficult to move.", beginner: ["These clocks", "were", "difficult", "to move."], idxMap: [0, 2, 2, 1], intermediate: ["These", "clocks", "were", "difficult", "to", "move."], advanced: ["These", "clocks", "were", "difficult", "to", "move."], dummies: ["This", "was", "moving", "for"], note: "形容詞（difficult）の後ろに「to ＋ 動詞の原形（to move）」を置いて「〜するのが難しい」を表します。" },
+      { id: 45, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.90)", topic: "不定詞（名詞的用法・begin to）", jp: "最後には、人々は懐中時計を持ち運ぶようになりました。", jpParts: ["最後には、", "人々は", "懐中時計を", "持ち運ぶようになりました。"], en: "Eventually, people began to carry watches.", beginner: ["Eventually,", "people", "began", "to carry", "watches."], idxMap: [0, 1, 3, 3, 2], intermediate: ["Eventually,", "people", "began", "to", "carry", "watches."], advanced: ["Eventually,", "people", "began", "to", "carry", "watches."], dummies: ["begin", "carrying", "watch", "a"], note: "begin to ＋ 動詞の原形（〜し始める）の過去形 began to carry です。" },
+      { id: 46, unitMajor: "Let's Read 1", unitGroup: "Let's Read 1", unitLabel: "Let's Read 1 (p.90)", topic: "構文（it is time to 〜）", jp: "今こそ古代の人々の英知を認識すべき時です。", jpParts: ["今こそ", "古代の人々の英知を", "認識すべき", "時です。"], en: "Now it is time to recognize the wisdom of those ancient people.", beginner: ["Now", "it is time", "to recognize", "the wisdom of those ancient people."], idxMap: [0, 3, 2, 1], intermediate: ["Now", "it", "is", "time", "to", "recognize", "the", "wisdom", "of", "those", "ancient", "people."], advanced: ["Now", "it", "is", "time", "to", "recognize", "the", "wisdom", "of", "those", "ancient", "people."], dummies: ["this", "recognizing", "for", "these"], note: "it is time to ＋ 動詞の原形 で「〜すべき時である」を表す重要構文です。" },
+      { id: 47, unitMajor: "Unit 4", unitGroup: "Unit 4 Part 1", unitLabel: "Unit 4 Part 1 (p.50)", topic: "助動詞（have to ＋ 動詞の原形）", jp: "あなたはその家の決まりに従わなければなりません。", jpParts: ["あなたは", "その家の決まりに", "従わなければなりません。"], en: "You have to follow the house rules.", beginner: ["You", "have to follow", "the house rules."], idxMap: [0, 2, 1], intermediate: ["You", "have to", "follow", "the", "house", "rules."], advanced: ["You", "have", "to", "follow", "the", "house", "rules."], dummies: ["has", "followed", "following", "rule"], note: "have to ＋ 動詞の原形（follow）で「〜しなければならない」という義務や必要性を表します。" },
+      { id: 48, unitMajor: "Unit 4", unitGroup: "Unit 4 Part 1", unitLabel: "Unit 4 Part 1 (p.50)", topic: "形式主語（It is important to 〜）", jp: "ホストファミリーと意思疎通することが大切です。", jpParts: ["ホストファミリーと", "意思疎通することが", "大切です。"], en: "It is important to communicate with them.", beginner: ["It", "is", "important", "to communicate", "with them."], idxMap: [-1, 2, 2, 1, 0], intermediate: ["It", "is", "important", "to", "communicate", "with", "them."], advanced: ["It", "is", "important", "to", "communicate", "with", "them."], dummies: ["This", "communicating", "to", "they"], note: "形式主語 It（インデックス-1）を文頭に置き、「to ＋ 動詞の原形」の塊を後ろに置きます。" },
+      { id: 49, unitMajor: "Unit 4", unitGroup: "Unit 4 Part 1", unitLabel: "Unit 4 Part 1 (p.50)", topic: "助動詞（do not have to 〜）", jp: "あなたは完ぺきな英語を話さなくてもよいです。", jpParts: ["あなたは", "完ぺきな英語を", "話さなくてもよいです。"], en: "You do not have to speak perfect English.", beginner: ["You", "do not have to speak", "perfect English."], idxMap: [0, 2, 1], intermediate: ["You", "do", "not", "have to", "speak", "perfect", "English."], advanced: ["You", "do", "not", "have", "to", "speak", "perfect", "English."], dummies: ["must", "does", "spoke", "speaking"], note: "do not have to ＋ 動詞の原形 で「〜しなくてもよい（不必要）」という意味になります。" },
+      { id: 50, unitMajor: "Unit 4", unitGroup: "Unit 4 Part 2", unitLabel: "Unit 4 Part 2 (p.51)", topic: "助動詞（must）・前置詞（by：期限）", jp: "あなたは6時までに帰宅しなければなりません。", jpParts: ["あなたは", "6時までに", "帰宅しなければなりません。"], en: "You must come home by six.", beginner: ["You", "must come", "home", "by six."], idxMap: [0, 2, 2, 1], intermediate: ["You", "must", "come", "home", "by", "six."], advanced: ["You", "must", "come", "home", "by", "six."], dummies: ["came", "to home", "until", "at"], note: "must ＋ 動詞の原形 で「〜しなければならない」。「（期限）までに」は前置詞 by を使います。" },
+      { id: 51, unitMajor: "Unit 4", unitGroup: "Unit 4 Part 2", unitLabel: "Unit 4 Part 2 (p.51)", topic: "助動詞（must not：禁止）", jp: "私たちは長時間シャワーを浴びてはいけません。", jpParts: ["私たちは", "長時間", "シャワーを", "浴びてはいけません。"], en: "We must not take long showers.", beginner: ["We", "must not take", "long showers."], idxMap: [0, 3, 1], intermediate: ["We", "must", "not", "take", "long", "showers."], advanced: ["We", "must", "not", "take", "long", "showers."], dummies: ["don't", "took", "taking", "shower"], note: "must not ＋ 動詞の原形 で「〜してはならない（禁止）」を表します。" },
+      { id: 52, unitMajor: "Unit 4", unitGroup: "Unit 4 Read & Think", unitLabel: "Unit 4 Read & Think 1 (p.52)", topic: "動詞＋動名詞（finish 〜ing）", jp: "読書を終えると、彼らは寝てしまいます。", jpParts: ["読書を", "終えると、", "彼らは", "寝てしまいます。"], en: "After they finish reading, they go to bed.", beginner: ["After", "they", "finish reading,", "they", "go to bed."], idxMap: [1, 2, 0, 2, 3], intermediate: ["After", "they", "finish", "reading,", "they", "go", "to", "bed."], advanced: ["After", "they", "finish", "reading,", "they", "go", "to", "bed."], dummies: ["finishes", "to read", "read", "went"], note: "finish の後ろは to不定詞ではなく動名詞（reading）を置きます。" },
+      { id: 53, unitMajor: "Unit 4", unitGroup: "Unit 4 Read & Think", unitLabel: "Unit 4 Read & Think 1 (p.52)", topic: "SVC（get ＋ 形容詞）・不定詞", jp: "私は夜に何もすることがないので退屈になります。", jpParts: ["私は", "夜に", "何もすることがないので", "退屈になります。"], en: "I get bored at night because I have nothing to do.", beginner: ["I", "get bored", "at night", "because", "I have nothing to do."], idxMap: [0, 3, 1, 2, 2], intermediate: ["I", "get", "bored", "at", "night", "because", "I", "have", "nothing", "to", "do."], advanced: ["I", "get", "bored", "at", "night", "because", "I", "have", "nothing", "to", "do."], dummies: ["boring", "in", "so", "doing"], note: "get ＋ 形容詞（bored）で「〜になる」、nothing to do で「すべきこと（＝すること）がない」を表します。" },
+      { id: 54, unitMajor: "Unit 4", unitGroup: "Unit 4 Read & Think", unitLabel: "Unit 4 Read & Think 1 (p.52)", topic: "疑問詞＋can I 〜", jp: "彼が私によそってくれる量が多すぎるときには何と言ったらよいでしょうか。", jpParts: ["彼が私によそってくれる量が多すぎるときには", "私は", "何と", "言ったらよいでしょうか。"], en: "What can I say when he's giving me too much?", beginner: ["What", "can", "I", "say", "when he's giving me too much?"], idxMap: [2, 3, 1, 3, 0], intermediate: ["What", "can", "I", "say", "when", "he's", "giving", "me", "too", "much?"], advanced: ["What", "can", "I", "say", "when", "he's", "giving", "me", "too", "much?"], dummies: ["How", "I can", "said", "many"], note: "What can I say? を先に言い、when で始まる節を後ろにつなげています。" },
+      { id: 55, unitMajor: "Unit 4", unitGroup: "Unit 4 Read & Think", unitLabel: "Unit 4 Read & Think 2 (p.54)", topic: "動名詞主語（Talking with 〜）", jp: "彼と話をするのは楽しかったです。", jpParts: ["彼と", "話をすることは", "楽しかったです。"], en: "Talking with him was fun.", beginner: ["Talking", "with him", "was", "fun."], idxMap: [1, 0, 2, 2], intermediate: ["Talking", "with", "him", "was", "fun."], advanced: ["Talking", "with", "him", "was", "fun."], dummies: ["Talk", "To talk", "were", "he"], note: "動名詞（Talking with him）が主語になるときは単数扱いなので動詞は was になります。" },
+      { id: 56, unitMajor: "Unit 4", unitGroup: "Unit 4 Read & Think", unitLabel: "Unit 4 Read & Think 2 (p.54)", topic: "熟語（feel like 〜ing）", jp: "私は自分の国について学んでみたくなりました。", jpParts: ["私は", "自分の国について", "学んでみたくなりました。"], en: "I felt like learning about my own country.", beginner: ["I", "felt like", "learning", "about my own country."], idxMap: [0, 3, 2, 1], intermediate: ["I", "felt", "like", "learning", "about", "my", "own", "country."], advanced: ["I", "felt", "like", "learning", "about", "my", "own", "country."], dummies: ["feel", "learn", "to learn", "for"], note: "feel like ＋ 動詞のing形 で「〜したい気がする」を表す重要表現です。" },
+      { id: 57, unitMajor: "Unit 4", unitGroup: "Unit 4 Read & Think", unitLabel: "Unit 4 Read & Think 2 (p.54)", topic: "熟語（keep 〜ing / try to）", jp: "私は英語で話そうとがんばり続けました。", jpParts: ["私は", "英語で", "話そうと", "がんばり続けました。"], en: "I kept trying to speak in English.", beginner: ["I", "kept", "trying to speak", "in English."], idxMap: [0, 3, 2, 1], intermediate: ["I", "kept", "trying", "to", "speak", "in", "English."], advanced: ["I", "kept", "trying", "to", "speak", "in", "English."], dummies: ["keep", "try", "speaking", "by"], note: "keep 〜ing（〜し続ける）の過去形 kept と try to 〜（〜しようとする）の組み合わせです。" },
+      { id: 58, unitMajor: "Unit 5", unitGroup: "Unit 5 Part 1", unitLabel: "Unit 5 Part 1 (p.60)", topic: "疑問詞＋to不定詞（how to 〜）", jp: "あなたはそれらの使い方を学ぶでしょう。", jpParts: ["あなたは", "それらの", "使い方を", "学ぶでしょう。"], en: "You will learn how to use them.", beginner: ["You", "will learn", "how to use", "them."], idxMap: [0, 3, 2, 1], intermediate: ["You", "will", "learn", "how", "to", "use", "them."], advanced: ["You", "will", "learn", "how", "to", "use", "them."], dummies: ["learned", "what", "using", "they"], note: "「how ＋ to ＋ 動詞の原形（how to use）」で「〜の仕方・使い方」を表します。" },
+      { id: 59, unitMajor: "Unit 5", unitGroup: "Unit 5 Part 1", unitLabel: "Unit 5 Part 1 (p.60)", topic: "疑問詞＋to不定詞（where to 〜）", jp: "あなたは私たちの市内のどこで施設を見つけられるかも知ることができます。", jpParts: ["あなたは", "私たちの市内の", "どこで", "施設を見つけられるかも", "知ることができます。"], en: "You will also learn where to find facilities in our city.", beginner: ["You", "will also learn", "where to find", "facilities", "in our city."], idxMap: [0, 4, 2, 3, 1], intermediate: ["You", "will", "also", "learn", "where", "to", "find", "facilities", "in", "our", "city."], advanced: ["You", "will", "also", "learn", "where", "to", "find", "facilities", "in", "our", "city."], dummies: ["when", "finding", "facility", "at"], note: "「where ＋ to ＋ 動詞の原形（where to find）」で「どこで〜すべきか」を表します。" },
+      { id: 60, unitMajor: "Unit 5", unitGroup: "Unit 5 Part 2", unitLabel: "Unit 5 Part 2 (p.61)", topic: "動詞＋人＋how to 〜", jp: "私はこれらの製品の使い方をあなたに見せることができます。", jpParts: ["私は", "これらの製品の", "使い方を", "あなたに", "見せることができます。"], en: "I can show you how to use these products.", beginner: ["I", "can show", "you", "how to use", "these products."], idxMap: [0, 4, 3, 2, 1], intermediate: ["I", "can", "show", "you", "how", "to", "use", "these", "products."], advanced: ["I", "can", "show", "you", "how", "to", "use", "these", "products."], dummies: ["shows", "your", "what", "this"], note: "show ＋ 人（you）＋ how to 〜 で「人に〜の仕方を示す・見せる」を表します。" },
+      { id: 61, unitMajor: "Unit 5", unitGroup: "Unit 5 Part 2", unitLabel: "Unit 5 Part 2 (p.61)", topic: "相関接続詞（Both A and B）", jp: "左利きの人も右利きの人も両方それらを使うことができます。", jpParts: ["左利きの人も右利きの人も両方", "それらを", "使うことができます。"], en: "Both left and right-handed people can use them.", beginner: ["Both left and right-handed people", "can use", "them."], idxMap: [0, 2, 1], intermediate: ["Both", "left", "and", "right-handed", "people", "can", "use", "them."], advanced: ["Both", "left", "and", "right-handed", "people", "can", "use", "them."], dummies: ["All", "uses", "they", "their"], note: "Both A and B で「AとBの両方」という意味になります。" },
+      { id: 62, unitMajor: "Unit 5", unitGroup: "Unit 5 Part 2", unitLabel: "Unit 5 Part 2 (p.61)", topic: "動詞＋人＋where to 〜", jp: "よろしければ、私はどこで施設を見つけられるかあなたに教えられます。", jpParts: ["よろしければ、", "私は", "どこで", "施設を見つけられるか", "あなたに", "教えられます。"], en: "I can tell you where to find facilities if you want.", beginner: ["I", "can tell", "you", "where to find", "facilities", "if you want."], idxMap: [1, 5, 4, 2, 3, 0], intermediate: ["I", "can", "tell", "you", "where", "to", "find", "facilities", "if", "you", "want."], advanced: ["I", "can", "tell", "you", "where", "to", "find", "facilities", "if", "you", "want."], dummies: ["tells", "your", "what", "when"], note: "tell ＋ 人（you）＋ where to 〜 で「人にどこで〜すべきかを教える」を表します。" },
+      { id: 63, unitMajor: "Unit 5", unitGroup: "Unit 5 Read & Think", unitLabel: "Unit 5 Read & Think 1 (p.62)", topic: "熟語（be useful for 〜）", jp: "ユニバーサルデザインはみんなにとって使いやすい（役に立つ）のです。", jpParts: ["ユニバーサルデザインは", "みんなにとって", "使いやすいのです。"], en: "Universal design is useful for everyone.", beginner: ["Universal design", "is useful", "for everyone."], idxMap: [0, 2, 1], intermediate: ["Universal", "design", "is", "useful", "for", "everyone."], advanced: ["Universal", "design", "is", "useful", "for", "everyone."], dummies: ["are", "use", "to", "all"], note: "be useful for 〜（〜にとって役に立つ・便利である）を使った表現です。" },
+      { id: 64, unitMajor: "Unit 5", unitGroup: "Unit 5 Read & Think", unitLabel: "Unit 5 Read & Think 1 (p.62)", topic: "接続詞（I'm sure that 〜）", jp: "私はこういった設備が多くの人々を助けると確信しています。", jpParts: ["私は", "こういった設備が", "多くの人々を", "助けると", "確信しています。"], en: "I'm sure that these facilities help many people.", beginner: ["I'm sure", "that", "these facilities", "help", "many people."], idxMap: [0, -1, 1, 3, 2], intermediate: ["I'm", "sure", "that", "these", "facilities", "help", "many", "people."], advanced: ["I'm", "sure", "that", "these", "facilities", "help", "many", "people."], dummies: ["which", "this", "helps", "much"], note: "I'm sure that ＋ 主語 ＋ 動詞 で「〜であると確信している」を表します。" },
+      { id: 65, unitMajor: "Unit 5", unitGroup: "Unit 5 Read & Think", unitLabel: "Unit 5 Read & Think 1 (p.62)", topic: "接続詞（I'm glad that 〜）", jp: "私は私たちの市内でそれらを見つけることができてうれしいです。", jpParts: ["私は", "私たちの市内で", "それらを", "見つけることができて", "うれしいです。"], en: "I'm glad that I could find them in our city.", beginner: ["I'm glad", "that", "I could find", "them", "in our city."], idxMap: [0, -1, 3, 2, 1], intermediate: ["I'm", "glad", "that", "I", "could", "find", "them", "in", "our", "city."], advanced: ["I'm", "glad", "that", "I", "could", "find", "them", "in", "our", "city."], dummies: ["which", "can", "found", "they"], note: "I'm glad that ＋ 主語 ＋ 動詞 で「〜してうれしい」と感情の理由を表します。" },
+      { id: 66, unitMajor: "Unit 5", unitGroup: "Unit 5 Read & Think", unitLabel: "Unit 5 Read & Think 2 (p.64)", topic: "不定詞（start to 〜）", jp: "1970年代、人々は障壁を取り除き始めました。", jpParts: ["1970年代、", "人々は", "障壁を", "取り除き始めました。"], en: "In the 1970s, people started to remove barriers.", beginner: ["In the 1970s,", "people", "started to remove", "barriers."], idxMap: [0, 1, 3, 2], intermediate: ["In", "the", "1970s,", "people", "started", "to", "remove", "barriers."], advanced: ["In", "the", "1970s,", "people", "started", "to", "remove", "barriers."], dummies: ["At", "start", "removing", "barrier"], note: "start to ＋ 動詞の原形（remove）で「〜し始める」を表します。" },
+      { id: 67, unitMajor: "Unit 5", unitGroup: "Unit 5 Read & Think", unitLabel: "Unit 5 Read & Think 2 (p.64)", topic: "熟語（regardless of 〜）", jp: "彼は年齢や能力に関係なく全ての人に適したデザインを作りたかったのです。", jpParts: ["彼は", "年齢や能力に関係なく", "全ての人に適したデザインを", "作りたかったのです。"], en: "He wanted to make designs for all people, regardless of age or ability.", beginner: ["He", "wanted to make", "designs for all people,", "regardless of age or ability."], idxMap: [0, 3, 2, 1], intermediate: ["He", "wanted", "to", "make", "designs", "for", "all", "people,", "regardless", "of", "age", "or", "ability."], advanced: ["He", "wanted", "to", "make", "designs", "for", "all", "people,", "regardless", "of", "age", "or", "ability."], dummies: ["want", "making", "for", "and"], note: "regardless of 〜（〜に関係なく）を使った重要な表現です。" },
+      { id: 68, unitMajor: "Unit 5", unitGroup: "Unit 5 Read & Think", unitLabel: "Unit 5 Read & Think 2 (p.64)", topic: "過去形（spread）", jp: "彼は自分の考えを世界に広めました。", jpParts: ["彼は", "自分の考えを", "世界に", "広めました。"], en: "He spread his idea around the world.", beginner: ["He", "spread", "his idea", "around the world."], idxMap: [0, 3, 1, 2], intermediate: ["He", "spread", "his", "idea", "around", "the", "world."], advanced: ["He", "spread", "his", "idea", "around", "the", "world."], dummies: ["spreads", "him", "in", "at"], note: "spread（広める）は原形・過去形・過去分詞がすべて同じ形（spread）です。" },
+      { id: 69, unitMajor: "Unit 6", unitGroup: "Unit 6 Part 1", unitLabel: "Unit 6 Part 1 (p.70)", topic: "比較（Which is 比較級, A or B?）", jp: "バスケットボールコートとテニスコートとではどちらが広いでしょうか。", jpParts: ["バスケットボールコートとテニスコートとでは", "どちらが", "広いでしょうか。"], en: "Which is larger, a basketball court or a tennis court?", beginner: ["Which", "is", "larger,", "a basketball court", "or", "a tennis court?"], idxMap: [1, 2, 2, 0, 0, 0], intermediate: ["Which", "is", "larger,", "a", "basketball", "court", "or", "a", "tennis", "court?"], advanced: ["Which", "is", "larger,", "a", "basketball", "court", "or", "a", "tennis", "court?"], dummies: ["What", "are", "large", "and"], note: "2つを比べて「どちらがより〜ですか？」と尋ねるときは Which is 比較級, A or B? を使います。" },
+      { id: 70, unitMajor: "Unit 6", unitGroup: "Unit 6 Part 1", unitLabel: "Unit 6 Part 1 (p.70)", topic: "比較（比較級 ＋ than）", jp: "バレーボールのほうがバスケットボールよりも小さいです。", jpParts: ["バレーボールのほうが", "バスケットボールよりも", "小さいです。"], en: "A volleyball is smaller than a basketball.", beginner: ["A volleyball", "is", "smaller", "than a basketball."], idxMap: [0, 2, 2, 1], intermediate: ["A", "volleyball", "is", "smaller", "than", "a", "basketball."], advanced: ["A", "volleyball", "is", "smaller", "than", "a", "basketball."], dummies: ["are", "small", "smallest", "from"], note: "2つのものを比べる比較級は「形容詞＋er ＋ than」の形を作ります。" },
+      { id: 71, unitMajor: "Unit 6", unitGroup: "Unit 6 Part 1", unitLabel: "Unit 6 Part 1 (p.70)", topic: "比較（the ＋ 最上級 ＋ of）", jp: "バレーボールは3つの中でいちばん小さいです。", jpParts: ["バレーボールは", "3つの中で", "いちばん小さいです。"], en: "A volleyball is the smallest of the three.", beginner: ["A volleyball", "is", "the smallest", "of the three."], idxMap: [0, 2, 2, 1], intermediate: ["A", "volleyball", "is", "the", "smallest", "of", "the", "three."], advanced: ["A", "volleyball", "is", "the", "smallest", "of", "the", "three."], dummies: ["smaller", "small", "in", "a"], note: "3つ以上の中で「いちばん〜」は「the ＋ 最上級」を使い、数の範囲には of を使います。" },
+      { id: 72, unitMajor: "Unit 6", unitGroup: "Unit 6 Part 2", unitLabel: "Unit 6 Part 2 (p.71)", topic: "比較（more ＋ 長い形容詞 ＋ than）", jp: "このスポーツはあのスポーツよりもおもしろいです。", jpParts: ["このスポーツは", "あのスポーツよりも", "おもしろいです。"], en: "This sport is more interesting than that one.", beginner: ["This sport", "is", "more interesting", "than that one."], idxMap: [0, 2, 2, 1], intermediate: ["This", "sport", "is", "more", "interesting", "than", "that", "one."], advanced: ["This", "sport", "is", "more", "interesting", "than", "that", "one."], dummies: ["most", "interested", "it", "from"], note: "interesting のような長い語は前に more をつけて比較級を作ります。" },
+      { id: 73, unitMajor: "Unit 6", unitGroup: "Unit 6 Part 2", unitLabel: "Unit 6 Part 2 (p.71)", topic: "比較（the most ＋ 長い形容詞 ＋ of all）", jp: "私はカーリングが全ての中でいちばんおもしろいスポーツだと思います。", jpParts: ["私は", "カーリングが", "全ての中で", "いちばんおもしろいスポーツだと", "思います。"], en: "I think curling is the most interesting sport of all.", beginner: ["I", "think", "curling", "is", "the most interesting sport", "of all."], idxMap: [0, 4, 1, 3, 3, 2], intermediate: ["I", "think", "curling", "is", "the", "most", "interesting", "sport", "of", "all."], advanced: ["I", "think", "curling", "is", "the", "most", "interesting", "sport", "of", "all."], dummies: ["more", "interested", "in", "a"], note: "長い語の最上級は「the most ＋ 形容詞」を使い、of all で「すべての中で」を表します。" },
+      { id: 74, unitMajor: "Unit 6", unitGroup: "Unit 6 Read & Think", unitLabel: "Unit 6 Read & Think 1 (p.72)", topic: "前置詞句（According to 〜）", jp: "私たちの結果によると、クラスメートの80パーセントがスポーツが好きです。", jpParts: ["私たちの結果によると、", "クラスメートの80パーセントが", "スポーツが", "好きです。"], en: "According to our results, 80 percent of our classmates like sports.", beginner: ["According to our results,", "80 percent of our classmates", "like", "sports."], idxMap: [0, 1, 3, 2], intermediate: ["According", "to", "our", "results,", "80", "percent", "of", "our", "classmates", "like", "sports."], advanced: ["According", "to", "our", "results,", "80", "percent", "of", "our", "classmates", "like", "sports."], dummies: ["likes", "result", "for", "in"], note: "According to 〜（〜によると）を文頭に置き、カンマ（,）で区切ります。" },
+      { id: 75, unitMajor: "Unit 6", unitGroup: "Unit 6 Read & Think", unitLabel: "Unit 6 Read & Think 1 (p.72)", topic: "比較（like A better than B）", jp: "クラスメートの半数より多くの人はバスケットボールよりもほかのスポーツのほうが好きです。", jpParts: ["クラスメートの半数より多くの人は", "バスケットボールよりも", "ほかのスポーツのほうが", "好きです。"], en: "More than half of our classmates like other sports better than basketball.", beginner: ["More than half of our classmates", "like", "other sports", "better than basketball."], idxMap: [0, 3, 2, 1], intermediate: ["More", "than", "half", "of", "our", "classmates", "like", "other", "sports", "better", "than", "basketball."], advanced: ["More", "than", "half", "of", "our", "classmates", "like", "other", "sports", "better", "than", "basketball."], dummies: ["likes", "best", "good", "another"], note: "like A better than B で「BよりもAのほうが好き」を表します。" },
+      { id: 76, unitMajor: "Unit 6", unitGroup: "Unit 6 Read & Think", unitLabel: "Unit 6 Read & Think 2 (p.74)", topic: "比較（the second most 〜 / as 〜 as）", jp: "それはクラスで2番めに人気があり、テニスと同じくらい人気です。", jpParts: ["それは", "クラスで", "2番めに人気があり、", "テニスと", "同じくらい人気です。"], en: "In our class, it is the second most popular, and it is as popular as tennis.", beginner: ["In our class,", "it", "is", "the second most popular,", "and", "it is", "as popular as", "tennis."], idxMap: [1, 0, 2, 2, 2, 0, 4, 3], intermediate: ["In", "our", "class,", "it", "is", "the", "second", "most", "popular,", "and", "it", "is", "as", "popular", "as", "tennis."], advanced: ["In", "our", "class,", "it", "is", "the", "second", "most", "popular,", "and", "it", "is", "as", "popular", "as", "tennis."], dummies: ["two", "more", "so", "than"], note: "the second most 〜（2番めに〜）と as 形容詞 as（〜と同じくらい…）の重要表現です。" },
+      { id: 77, unitMajor: "Unit 6", unitGroup: "Unit 6 Read & Think", unitLabel: "Unit 6 Read & Think 2 (p.74)", topic: "接続詞（but）・too ＋ 形容詞", jp: "スライドはよかったのですが、文字の中には小さすぎるものがありました。", jpParts: ["スライドは", "よかったのですが、", "文字の中には", "小さすぎるものが", "ありました。"], en: "Your slides were good, but some of the letters were too small.", beginner: ["Your slides", "were good,", "but", "some of the letters", "were", "too small."], idxMap: [0, 1, 1, 2, 4, 3], intermediate: ["Your", "slides", "were", "good,", "but", "some", "of", "the", "letters", "were", "too", "small."], advanced: ["Your", "slides", "were", "good,", "but", "some", "of", "the", "letters", "were", "too", "small."], dummies: ["was", "and", "letter", "very"], note: "some of the ＋ 複数名詞（letters）は複数扱いなので be動詞は were を使います。" },
+      { id: 78, unitMajor: "Let's Read 2", unitGroup: "Let's Read 2", unitLabel: "Let's Read 2 (p.84)", topic: "熟語（be about to 〜）", jp: "少年が今にも立ち去ろうとしていたとき、その女性は「待って」と言いました。", jpParts: ["少年が", "今にも立ち去ろうとしていたとき、", "その女性は", "「待って」と", "言いました。"], en: "When the boy was about to leave, the woman said, \"Wait.\"", beginner: ["When", "the boy", "was about to leave,", "the woman", "said,", "\"Wait.\""], idxMap: [1, 0, 1, 2, 4, 3], intermediate: ["When", "the", "boy", "was", "about", "to", "leave,", "the", "woman", "said,", "\"Wait.\""], advanced: ["When", "the", "boy", "was", "about", "to", "leave,", "the", "woman", "said,", "\"Wait.\""], dummies: ["is", "leaving", "say", "women"], note: "be about to ＋ 動詞の原形 で「今にも〜しようとしている」を表します。" },
+      { id: 79, unitMajor: "Let's Read 2", unitGroup: "Let's Read 2", unitLabel: "Let's Read 2 (p.84)", topic: "熟語（feel sorry for 〜）・SVC（look）", jp: "彼がとてもお腹をすかせた様子だったので、彼女は彼をかわいそうに思いました。", jpParts: ["彼が", "とてもお腹をすかせた様子だったので、", "彼女は", "彼をかわいそうに思いました。"], en: "She felt sorry for him because he looked very hungry.", beginner: ["She", "felt sorry for him", "because", "he", "looked very hungry."], idxMap: [2, 3, 1, 0, 1], intermediate: ["She", "felt", "sorry", "for", "him", "because", "he", "looked", "very", "hungry."], advanced: ["She", "felt", "sorry", "for", "him", "because", "he", "looked", "very", "hungry."], dummies: ["feel", "to", "look", "hungrily"], note: "feel sorry for 人（人をかわいそうに思う）と look ＋ 形容詞（〜に見える）の組み合わせです。" },
+      { id: 80, unitMajor: "Let's Read 2", unitGroup: "Let's Read 2", unitLabel: "Let's Read 2 (p.85)", topic: "助動詞（don't need to 〜）", jp: "あなたは支払う必要はありません。", jpParts: ["あなたは", "支払う必要は", "ありません。"], en: "You don't need to pay.", beginner: ["You", "don't need to", "pay."], idxMap: [0, 2, 1], intermediate: ["You", "don't", "need", "to", "pay."], advanced: ["You", "don't", "need", "to", "pay."], dummies: ["doesn't", "needed", "paying", "paid"], note: "don't need to ＋ 動詞の原形（pay）で「〜する必要はない（＝don't have to）」を表します。" },
+      { id: 81, unitMajor: "Let's Read 2", unitGroup: "Let's Read 2", unitLabel: "Let's Read 2 (p.86)", topic: "過去形（had to）・SVOO（give 人 もの）", jp: "医師たちはすぐに彼女に手術をしなければいけませんでした。", jpParts: ["医師たちは", "すぐに", "彼女に", "手術をしなければいけませんでした。"], en: "The doctors had to give her an operation right away.", beginner: ["The doctors", "had to give", "her", "an operation", "right away."], idxMap: [0, 3, 2, 3, 1], intermediate: ["The", "doctors", "had", "to", "give", "her", "an", "operation", "right", "away."], advanced: ["The", "doctors", "had", "to", "give", "her", "an", "operation", "right", "away."], dummies: ["have", "gave", "she", "a"], note: "have to の過去形 had to（〜しなければならなかった）と right away（すぐに）です。" },
+      { id: 82, unitMajor: "Let's Read 2", unitGroup: "Let's Read 2", unitLabel: "Let's Read 2 (p.86)", topic: "熟語（be afraid to 〜）", jp: "彼女は中を見るのをこわがりました。", jpParts: ["彼女は", "中を見るのを", "こわがりました。"], en: "She was afraid to look inside.", beginner: ["She", "was afraid", "to look inside."], idxMap: [0, 2, 1], intermediate: ["She", "was", "afraid", "to", "look", "inside."], advanced: ["She", "was", "afraid", "to", "look", "inside."], dummies: ["is", "looking", "outside", "at"], note: "be afraid to ＋ 動詞の原形 で「〜するのをこわがる・恐れる」を表します。" },
+      { id: 83, unitMajor: "Unit 7", unitGroup: "Unit 7 Part 1", unitLabel: "Unit 7 Part 1 (p.90)", topic: "受動態（現在形・are ＋ 過去分詞）", jp: "その中のいくつかは世界遺産として選ばれています。", jpParts: ["その中のいくつかは", "世界遺産として", "選ばれています。"], en: "Some of them are selected as World Heritage sites.", beginner: ["Some of them", "are selected", "as World Heritage sites."], idxMap: [0, 2, 1], intermediate: ["Some", "of", "them", "are", "selected", "as", "World", "Heritage", "sites."], advanced: ["Some", "of", "them", "are", "selected", "as", "World", "Heritage", "sites."], dummies: ["is", "select", "selecting", "for"], note: "「be動詞 ＋ 過去分詞（are selected）」で「〜される・されている」という受け身を表します。" },
+      { id: 84, unitMajor: "Unit 7", unitGroup: "Unit 7 Part 1", unitLabel: "Unit 7 Part 1 (p.90)", topic: "受動態（過去形・were ＋ 過去分詞）", jp: "その選定基準は1972年にユネスコ総会で決定されました。", jpParts: ["その選定基準は", "1972年に", "ユネスコ総会で", "決定されました。"], en: "The selection standards were decided at the UNESCO General Conference in 1972.", beginner: ["The selection standards", "were decided", "at the UNESCO General Conference", "in 1972."], idxMap: [0, 3, 2, 1], intermediate: ["The", "selection", "standards", "were", "decided", "at", "the", "UNESCO", "General", "Conference", "in", "1972."], advanced: ["The", "selection", "standards", "were", "decided", "at", "the", "UNESCO", "General", "Conference", "in", "1972."], dummies: ["was", "decide", "deciding", "on"], note: "主語（standards）が複数で過去の出来事なので「were ＋ 過去分詞（decided）」を使います。" },
+      { id: 85, unitMajor: "Unit 7", unitGroup: "Unit 7 Part 2", unitLabel: "Unit 7 Part 2 (p.91)", topic: "受動態（is called 〜）", jp: "それはケープ植物区と呼ばれています。", jpParts: ["それは", "ケープ植物区と", "呼ばれています。"], en: "It is called the Cape Floral Region.", beginner: ["It", "is called", "the Cape Floral Region."], idxMap: [0, 2, 1], intermediate: ["It", "is", "called", "the", "Cape", "Floral", "Region."], advanced: ["It", "is", "called", "the", "Cape", "Floral", "Region."], dummies: ["are", "call", "calling", "as"], note: "It is called 〜 で「それは〜と呼ばれています」を表す受け身の定番表現です。" },
+      { id: 86, unitMajor: "Unit 7", unitGroup: "Unit 7 Part 2", unitLabel: "Unit 7 Part 2 (p.91)", topic: "受動態・熟語（be known for 〜）", jp: "それは植物の多様性で知られています。", jpParts: ["それは", "植物の多様性で", "知られています。"], en: "It is known for plant diversity.", beginner: ["It", "is known for", "plant diversity."], idxMap: [0, 2, 1], intermediate: ["It", "is", "known", "for", "plant", "diversity."], advanced: ["It", "is", "known", "for", "plant", "diversity."], dummies: ["know", "knew", "to", "by"], note: "be known for 〜（〜で有名である・知られている）を使った表現です。" },
+      { id: 87, unitMajor: "Unit 7", unitGroup: "Unit 7 Read & Think", unitLabel: "Unit 7 Read & Think 1 (p.92)", topic: "構文（one of the ＋ 最上級 ＋ 複数名詞）", jp: "タージ・マハルは最も人気のある世界遺産の1つです。", jpParts: ["タージ・マハルは", "最も人気のある", "世界遺産の", "1つです。"], en: "The Taj Mahal is one of the most popular World Heritage sites.", beginner: ["The Taj Mahal", "is", "one of", "the most popular", "World Heritage sites."], idxMap: [0, 3, 3, 1, 2], intermediate: ["The", "Taj", "Mahal", "is", "one", "of", "the", "most", "popular", "World", "Heritage", "sites."], advanced: ["The", "Taj", "Mahal", "is", "one", "of", "the", "most", "popular", "World", "Heritage", "sites."], dummies: ["are", "more", "site", "a"], note: "one of the ＋ 最上級 ＋ 複数名詞（sites）で「最も〜なものの1つ」を表します。" },
+      { id: 88, unitMajor: "Unit 7", unitGroup: "Unit 7 Read & Think", unitLabel: "Unit 7 Read & Think 1 (p.92)", topic: "受動態（was built by 行為者）", jp: "それは350年以上前に皇帝シャー・ジャハーンによって建てられました。", jpParts: ["それは", "350年以上前に", "皇帝シャー・ジャハーンによって", "建てられました。"], en: "It was built by Emperor Shah Jahan more than 350 years ago.", beginner: ["It", "was built", "by Emperor Shah Jahan", "more than 350 years ago."], idxMap: [0, 3, 2, 1], intermediate: ["It", "was", "built", "by", "Emperor", "Shah", "Jahan", "more", "than", "350", "years", "ago."], advanced: ["It", "was", "built", "by", "Emperor", "Shah", "Jahan", "more", "than", "350", "years", "ago."], dummies: ["were", "build", "building", "from"], note: "build（建てる）の過去分詞は built です。行為者（〜によって）は by で表します。" },
+      { id: 89, unitMajor: "Unit 7", unitGroup: "Unit 7 Read & Think", unitLabel: "Unit 7 Read & Think 1 (p.92)", topic: "受動態・熟語（be covered with 〜）", jp: "その建物は白い大理石でおおわれています。", jpParts: ["その建物は", "白い大理石で", "おおわれています。"], en: "The building is covered with white marble.", beginner: ["The building", "is covered with", "white marble."], idxMap: [0, 2, 1], intermediate: ["The", "building", "is", "covered", "with", "white", "marble."], advanced: ["The", "building", "is", "covered", "with", "white", "marble."], dummies: ["are", "cover", "by", "in"], note: "be covered with 〜（〜でおおわれている）は前置詞 with を使うのがポイントです。" },
+      { id: 90, unitMajor: "Unit 7", unitGroup: "Unit 7 Read & Think", unitLabel: "Unit 7 Read & Think 2 (p.94)", topic: "助動詞＋受動態（will be ＋ 過去分詞）", jp: "私は富士山が永遠に人々に楽しんでもらえることを願っています。", jpParts: ["私は", "富士山が", "永遠に", "人々に", "楽しんでもらえることを", "願っています。"], en: "I hope Mt. Fuji will be enjoyed by people forever.", beginner: ["I", "hope", "Mt. Fuji", "will be enjoyed", "by people", "forever."], idxMap: [0, 5, 1, 4, 3, 2], intermediate: ["I", "hope", "Mt. Fuji", "will", "be", "enjoyed", "by", "people", "forever."], advanced: ["I", "hope", "Mt.", "Fuji", "will", "be", "enjoyed", "by", "people", "forever."], dummies: ["hopes", "enjoy", "enjoying", "for"], note: "「will be ＋ 過去分詞（enjoyed）」で「（これから）〜されるだろう」を表します。" }
+    ];
+
+    // 各問題の「語順の型（公式）」データ
+    const GRAMMAR_FORMULAS = {
+      1: { formula: "主語 ＋ be動詞 ＋ in the same class", desc: "「同じクラスに所属している」は be in the same class で表します。" },
+      2: { formula: "主語 ＋ went ＋ to 場所 ＋ with 人", desc: "英語は「誰が → どうした → どこへ → 誰と」の順で並べます。" },
+      3: { formula: "主語 ＋ enjoyed ＋ 動詞のing形 ＋ with 人", desc: "enjoy の後ろは to不定詞ではなく必ず動名詞（skiing）を置きます。" },
+      4: { formula: "Actually, 主語 ＋ had(ate) ＋ 食べ物 ＋ with 人", desc: "「（食事を）食べる」は ate のほかに had もよく使われます。" },
+      5: { formula: "主語 ＋ am/is/are going to ＋ leave for 場所 ＋ 時", desc: "leave for ＋ 場所 で「（場所）に向かって出発する」という意味になります。" },
+      6: { formula: "主語 ＋ am/is/are going to ＋ show 人 around 場所", desc: "show ＋ 人 ＋ around ＋ 場所 で「人に場所を案内して回る」を表します。" },
+      7: { formula: "Are/Is ＋ 主語 ＋ going to ＋ 動詞の原形 ＋ 目的語 ＋ 時?", desc: "be going to の疑問文は be動詞を主語の前に出します。" },
+      8: { formula: "Where ＋ are/is ＋ 主語 ＋ going to ＋ 動詞の原形 ＋ 場所?", desc: "疑問詞 Where を文頭に置き、後ろを疑問文の語順にします。" },
+      9: { formula: "Is/Are ＋ 主語 ＋ far from ＋ 場所?", desc: "far from 〜（〜から遠い）を使った be動詞の疑問文です。" },
+      10: { formula: "主語 ＋ will ＋ 動詞の原形 ＋ 目的語 ＋ soon", desc: "will ＋ 動詞の原形 で「〜でしょう」という未来の予測を表します。" },
+      11: { formula: "I ＋ will ＋ make a reservation（予約をする）", desc: "その場で決めた意志を表す will と make a reservation の組み合わせです。" },
+      12: { formula: "It is ＋ 数字＋単位 tall, and it weighs ＋ 重さ", desc: "「数字＋単位＋tall」で高さ、動詞 weigh で「〜の重さがある」を表します。" },
+      13: { formula: "主語 ＋ will show ＋ 人(you) ＋ もの ＋ at school", desc: "show ＋ 人 ＋ もの の語順なら前置詞 to は不要です。" },
+      14: { formula: "So, 主語 ＋ can communicate with 人 ＋ in 言語", desc: "communicate with 人（人と意思の疎通をする）と in 言語（〜語で）です。" },
+      15: { formula: "One of the ＋ 複数名詞 ＋ 動詞の過去形 ＋ 目的語", desc: "one of the の後ろは必ず複数名詞（paintings）になります。" },
+      16: { formula: "主語 ＋ call ＋ A(対象) ＋ B(呼び名)", desc: "「call ＋ A ＋ B」で「AをBと呼ぶ」という語順を作ります。" },
+      17: { formula: "主語 ＋ bought ＋ もの ＋ for ＋ 人", desc: "buy ＋ もの ＋ for ＋ 人 で「人のためにものを買う」を表します。" },
+      18: { formula: "When ＋ 主語 ＋ 動詞 〜, 主語 ＋ 頻度副詞 ＋ 動詞 〜", desc: "When で始まる節を前に置くときは後ろにカンマ（,）をつけます。" },
+      19: { formula: "Actually, there are ＋ 複数名詞 ＋ in 場所", desc: "主語（various ramen flavors）が複数なので There are を使います。" },
+      20: { formula: "主語 ＋ 頻度副詞 ＋ 動詞 〜 ＋ when ＋ 主語 ＋ 動詞", desc: "when 節を文の後半に置くときはカンマ（,）は不要です。" },
+      21: { formula: "主語 ＋ is/are ＋ famous for ＋ 名詞（〜で有名）", desc: "be famous for 〜（〜で有名である）を使った定番表現です。" },
+      22: { formula: "If ＋ 主語 ＋ 動詞 〜, 主語 ＋ can ＋ 動詞の原形 〜", desc: "条件を表す接続詞 If（もし〜ならば）を使った文です。" },
+      23: { formula: "主語 ＋ can add A to B ＋ if ＋ 主語 ＋ 動詞", desc: "add A to B（AをBに加える）の後ろに if you want を続けています。" },
+      24: { formula: "主語 ＋ stays ＋ 形容詞(warm) ＋ because ＋ 主語 ＋ 動詞", desc: "stay ＋ 形容詞 で「〜のままでいる」を表します。" },
+      25: { formula: "主語 ＋ make ＋ 目的語 ＋ with 材料 〜", desc: "「〜を使って（材料・道具）」を表す前置詞 with を使った文です。" },
+      26: { formula: "主語 ＋ came from 場所, and now ＋ 主語 ＋ is 〜", desc: "come from 〜（〜出身である・〜発祥である）の過去形 came from です。" },
+      27: { formula: "主語 ＋ named A after B（BにちなんでAと名づけた）", desc: "name A after B で「BにちなんでAと名づける」を表します。" },
+      28: { formula: "I think ＋ 主語(単数) ＋ 動詞1(s) and 動詞2(s) 〜", desc: "I think の後ろで主語 food に対して動詞が2つ並んでいます。" },
+      29: { formula: "動詞の原形(Make) ＋ your own ＋ 名詞", desc: "your own 〜 で「あなた自身の〜」を強調する命令文です。" },
+      30: { formula: "動詞の原形(Bring) ＋ もの ＋ to ＋ 動詞の原形（〜するために）", desc: "命令文の後ろに目的を表す「to ＋ 動詞の原形」を置きます。" },
+      31: { formula: "Take ＋ もの ＋ home ＋ with 人", desc: "take もの with 人 で「（人が）ものを携えていく・持ち帰る」を表します。" },
+      32: { formula: "主語 ＋ need to ＋ 動詞の原形 ＋ もの ＋ to 人", desc: "need to ＋ 動詞の原形 で「〜する必要がある」を表します。" },
+      33: { formula: "主語 ＋ am/is/are ＋ happy ＋ to ＋ 動詞の原形 〜", desc: "感情を表す形容詞（happy）の後ろに「to ＋ 動詞の原形」を置いて原因を表します。" },
+      34: { formula: "Here are ＋ 複数名詞 ＋ to ＋ 動詞の原形（〜すべき…）", desc: "名詞の後ろに「to ＋ 動詞の原形（to look at）」を置いて修飾します。" },
+      35: { formula: "主語 ＋ taught ＋ 人(me) ＋ もの ＋ to ＋ 動詞の原形", desc: "teach ＋ 人 ＋ もの の後ろに修飾の不定詞（to remember）を続けています。" },
+      36: { formula: "主語 ＋ started to ＋ look for ＋ 名詞", desc: "start to ＋ 動詞の原形（〜し始める）と look for（〜をさがす）の組み合わせです。" },
+      37: { formula: "It is ＋ important ＋ to ＋ 動詞の原形 〜 ＋ when ＋ 主語 ＋ 動詞", desc: "形式主語 It を文頭に置き、「to ＋ 動詞の原形」の塊を後ろに置きます。" },
+      38: { formula: "主語 ＋ tried to ＋ 動詞の原形 ＋ 目的語", desc: "try to ＋ 動詞の原形（〜しようと試みる）の過去形 tried to です。" },
+      39: { formula: "From now on, 主語 ＋ am going to ＋ read out loud ＋ every day", desc: "from now on（これからは）と read out loud（音読する）を使った表現です。" },
+      40: { formula: "When ＋ 主語 ＋ need to ＋ 動詞の原形 〜, 主語 ＋ look at 〜", desc: "When で始まる節を文頭に置き、カンマ（,）で区切って主文を続けます。" },
+      41: { formula: "主語 ＋ used ＋ 目的語 ＋ to ＋ 動詞の原形（〜するために）", desc: "「自然を利用した」の後ろに目的（to read the time）をつなげます。" },
+      42: { formula: "主語 ＋ told ＋ 人(them) ＋ もの(the time)", desc: "tell ＋ 人 ＋ もの で「人に時刻を教える・告げる」を表します。" },
+      43: { formula: "時, 主語 ＋ started to ＋ 動詞の原形 ＋ without it", desc: "without it（それ＝太陽なしで）を文末に置いた文です。" },
+      44: { formula: "主語(複数) ＋ were ＋ difficult ＋ to ＋ 動詞の原形", desc: "形容詞（difficult）の後ろに「to ＋ 動詞の原形」を置いて「〜するのが難しい」を表します。" },
+      45: { formula: "Eventually, 主語 ＋ began to ＋ 動詞の原形 ＋ 目的語", desc: "begin to ＋ 動詞の原形（〜し始める）の過去形 began to carry です。" },
+      46: { formula: "Now it is time ＋ to ＋ 動詞の原形 〜", desc: "it is time to ＋ 動詞の原形 で「〜すべき時である」を表す重要構文です。" },
+      47: { formula: "主語 ＋ have to ＋ 動詞の原形 ＋ 目的語", desc: "have to ＋ 動詞の原形 で「〜しなければならない」という義務を表します。" },
+      48: { formula: "It is ＋ important ＋ to ＋ 動詞の原形 ＋ with 人", desc: "形式主語 It を文頭に置き、「to ＋ 動詞の原形」の塊を後ろに置きます。" },
+      49: { formula: "主語 ＋ do not have to ＋ 動詞の原形 ＋ 目的語", desc: "do not have to ＋ 動詞の原形 で「〜しなくてもよい」という意味になります。" },
+      50: { formula: "主語 ＋ must ＋ 動詞の原形 ＋ 場所 ＋ by 期限", desc: "must ＋ 動詞の原形 で「〜しなければならない」。「〜までに」は by を使います。" },
+      51: { formula: "主語 ＋ must not ＋ 動詞の原形 ＋ 目的語", desc: "must not ＋ 動詞の原形 で「〜してはならない（禁止）」を表します。" },
+      52: { formula: "After ＋ 主語 ＋ finish ＋ 動詞のing形, 主語 ＋ 動詞 〜", desc: "finish の後ろは to不定詞ではなく動名詞（reading）を置きます。" },
+      53: { formula: "主語 ＋ get ＋ 形容詞 ＋ at night ＋ because ＋ 主語 ＋ have nothing to do", desc: "get ＋ 形容詞 で「〜になる」、nothing to do で「することがない」を表します。" },
+      54: { formula: "What can I ＋ 動詞の原形 ＋ when ＋ 主語 ＋ is 〜ing ...", desc: "What can I say? を先に言い、when で始まる節を後ろにつなげています。" },
+      55: { formula: "動名詞(Talking with him) ＋ was ＋ 形容詞", desc: "動名詞が主語になるときは単数扱いなので動詞は was になります。" },
+      56: { formula: "主語 ＋ felt like ＋ 動詞のing形 ＋ about 〜", desc: "feel like ＋ 動詞のing形 で「〜したい気がする」を表す重要表現です。" },
+      57: { formula: "主語 ＋ kept ＋ trying to ＋ 動詞の原形 ＋ in 言語", desc: "keep 〜ing（〜し続ける）の過去形 kept と try to 〜 の組み合わせです。" },
+      58: { formula: "主語 ＋ will learn ＋ how to ＋ 動詞の原形 ＋ 目的語", desc: "「how ＋ to ＋ 動詞の原形（how to use）」で「〜の仕方・使い方」を表します。" },
+      59: { formula: "主語 ＋ will also learn ＋ where to ＋ 動詞の原形 ＋ 目的語 ＋ 場所", desc: "「where ＋ to ＋ 動詞の原形（where to find）」で「どこで〜すべきか」を表します。" },
+      60: { formula: "主語 ＋ can show ＋ 人 ＋ how to ＋ 動詞の原形 ＋ 目的語", desc: "show ＋ 人 ＋ how to 〜 で「人に〜の仕方を示す・見せる」を表します。" },
+      61: { formula: "Both A and B ＋ can ＋ 動詞の原形 ＋ 目的語", desc: "Both A and B で「AとBの両方」という意味になります。" },
+      62: { formula: "主語 ＋ can tell ＋ 人 ＋ where to ＋ 動詞の原形 ＋ 目的語 ＋ if you want", desc: "tell ＋ 人 ＋ where to 〜 で「人にどこで〜すべきかを教える」を表します。" },
+      63: { formula: "主語 ＋ is/are ＋ useful for ＋ 対象", desc: "be useful for 〜（〜にとって役に立つ・便利である）を使った表現です。" },
+      64: { formula: "I'm sure ＋ that ＋ 主語 ＋ 動詞 ＋ 目的語", desc: "I'm sure that ＋ 主語 ＋ 動詞 で「〜であると確信している」を表します。" },
+      65: { formula: "I'm glad ＋ that ＋ 主語 ＋ could ＋ 動詞の原形 ＋ 目的語 ＋ 場所", desc: "I'm glad that ＋ 主語 ＋ 動詞 で「〜してうれしい」と感情の理由を表します。" },
+      66: { formula: "In the 1970s, 主語 ＋ started to ＋ 動詞の原形 ＋ 目的語", desc: "start to ＋ 動詞の原形（remove）で「〜し始める」を表します。" },
+      67: { formula: "主語 ＋ wanted to make ＋ 目的語, regardless of A or B", desc: "regardless of 〜（〜に関係なく）を使った重要な表現です。" },
+      68: { formula: "主語 ＋ spread ＋ 目的語 ＋ around the world", desc: "spread（広める）は原形・過去形・過去分詞がすべて同じ形です。" },
+      69: { formula: "Which is ＋ 比較級, A or B?", desc: "2つを比べて「どちらがより〜ですか？」と尋ねる定番疑問文です。" },
+      70: { formula: "A ＋ is/are ＋ 比較級(-er) ＋ than ＋ B", desc: "2つのものを比べる比較級は「形容詞＋er ＋ than」の形を作ります。" },
+      71: { formula: "主語 ＋ is/are ＋ the ＋ 最上級(-est) ＋ of the three", desc: "3つ以上の中で「いちばん〜」は「the ＋ 最上級」を使い、数の範囲には of を使います。" },
+      72: { formula: "A ＋ is/are ＋ more ＋ 長い形容詞 ＋ than ＋ B", desc: "interesting のような長い語は前に more をつけて比較級を作ります。" },
+      73: { formula: "I think ＋ 主語 ＋ is ＋ the most ＋ 長い形容詞 ＋ 名詞 ＋ of all", desc: "長い語の最上級は「the most ＋ 形容詞」を使い、of all で「すべての中で」を表します。" },
+      74: { formula: "According to 〜, 主語 ＋ 動詞 ＋ 目的語", desc: "According to 〜（〜によると）を文頭に置き、カンマ（,）で区切ります。" },
+      75: { formula: "主語 ＋ like A ＋ better than B", desc: "like A better than B で「BよりもAのほうが好き」を表します。" },
+      76: { formula: "場所, it is the second most 〜, and it is as 形容詞 as B", desc: "the second most 〜（2番めに〜）と as 形容詞 as（〜と同じくらい…）の組み合わせです。" },
+      77: { formula: "主語(複数) ＋ were good, but some of the 複数名詞 ＋ were too 形容詞", desc: "some of the ＋ 複数名詞は複数扱いなので be動詞は were を使います。" },
+      78: { formula: "When ＋ 主語 ＋ was about to ＋ 動詞の原形, 主語 ＋ said, ...", desc: "be about to ＋ 動詞の原形 で「今にも〜しようとしている」を表します。" },
+      79: { formula: "主語 ＋ felt sorry for 人 ＋ because ＋ 主語 ＋ looked 形容詞", desc: "feel sorry for 人（人をかわいそうに思う）と look ＋ 形容詞（〜に見える）です。" },
+      80: { formula: "主語 ＋ don't need to ＋ 動詞の原形", desc: "don't need to ＋ 動詞の原形 で「〜する必要はない（＝don't have to）」を表します。" },
+      81: { formula: "主語 ＋ had to ＋ give 人 もの ＋ right away", desc: "have to の過去形 had to（〜しなければならなかった）と right away（すぐに）です。" },
+      82: { formula: "主語 ＋ was/were afraid to ＋ 動詞の原形", desc: "be afraid to ＋ 動詞の原形 で「〜するのをこわがる・恐れる」を表します。" },
+      83: { formula: "Some of them ＋ are ＋ 過去分詞(selected) ＋ as 〜", desc: "「be動詞 ＋ 過去分詞」で「〜される・されている」という受け身を表します。" },
+      84: { formula: "主語(複数) ＋ were ＋ 過去分詞(decided) ＋ 場所 ＋ in 年", desc: "主語が複数で過去の出来事なので「were ＋ 過去分詞」を使います。" },
+      85: { formula: "It is ＋ called ＋ 呼び名（それは〜と呼ばれています）", desc: "It is called 〜 で「それは〜と呼ばれています」を表す受け身の定番表現です。" },
+      86: { formula: "It is ＋ known for ＋ 名詞（〜で知られている）", desc: "be known for 〜（〜で有名である・知られている）を使った表現です。" },
+      87: { formula: "主語 ＋ is ＋ one of the most ＋ 形容詞 ＋ 複数名詞", desc: "one of the ＋ 最上級 ＋ 複数名詞で「最も〜なものの1つ」を表します。" },
+      88: { formula: "It was ＋ 過去分詞(built) ＋ by 行為者 ＋ 期間 ago", desc: "build（建てる）の過去分詞は built です。行為者（〜によって）は by で表します。" },
+      89: { formula: "主語 ＋ is/are ＋ covered with ＋ 名詞（〜でおおわれている）", desc: "be covered with 〜（〜でおおわれている）は前置詞 with を使うのがポイントです。" },
+      90: { formula: "I hope ＋ 主語 ＋ will be ＋ 過去分詞(enjoyed) ＋ by 人 ＋ forever", desc: "「will be ＋ 過去分詞」で「（これから）〜されるだろう」を表します。" }
+    };
+
+    // アプリケーション状態管理
+    let state = {
+      mainTab: 'cover', // 'cover' | 'practice' | 'grammar'
+      grammarFilter: 'ALL',
+      unitFilter: 'ALL',
+      onlyLearned: true,
+      learnedIds: new Set(QUESTIONS.map(q => q.id)), // 初期状態は全90問ON
+      currentQuestionId: 1,
+      level: 'beginner', // 'beginner' | 'intermediate' | 'advanced'
+      selectedTokens: [], // { id, text }
+      choicePool: [],     // { id, text, used }
+      hintActive: false,
+      hintUsedCount: 0,
+      mistakeCount: 0,
+      bestScores: {},     // { [questionId]: number (0〜100) }
+      bestStars: {},      // { [questionId]: number (1〜3) }
+      lastEarnedScore: 0,
+      lastEarnedStars: 0,
+      isSolved: false,
+      customCharUrl: null // ユーザーがアップロードした画像URL
+    };
+
+    // キャラクターのカスタムSVG生成（青いカーディガン・星ヘアピン・指示棒・青い教科書）
+    function getCharacterSvg(isMini = false) {
+      const viewBox = isMini ? "20 12 160 155" : "0 5 200 230";
+      return `
+        <svg viewBox="${viewBox}" class="w-full h-full object-contain" xmlns="http://www.w3.org/2000/svg" aria-label="ナビゲーターキャラクター">
+          <!-- 後ろ髪 -->
+          <path d="M52 85 C42 115, 44 142, 58 148 C65 140, 68 125, 70 110 Z" fill="#54453d" stroke="#2c221e" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M148 85 C158 115, 156 142, 142 148 C135 140, 132 125, 130 110 Z" fill="#54453d" stroke="#2c221e" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- 首 -->
+          <rect x="92" y="128" width="16" height="16" rx="4" fill="#ffe5d9" stroke="#2c221e" stroke-width="2"/>
+          <!-- チェックのプリーツスカート -->
+          <path d="M68 192 L58 228 L142 228 L132 192 Z" fill="#2b4c7e" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M78 192 L72 228 M92 192 L90 228 M108 192 L110 228 M122 192 L128 228" stroke="#1e3a5f" stroke-width="2"/>
+          <path d="M63 208 L137 208 M60 220 L140 220" stroke="#38bdf8" stroke-width="1.5" opacity="0.6"/>
+          <!-- 白シャツ襟＆紺ベスト -->
+          <path d="M74 142 L126 142 L132 195 L68 195 Z" fill="#334155" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="84,142 100,162 116,142" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <!-- 青ストライプのリボン -->
+          <path d="M100 153 L83 144 L80 160 Z" fill="#1d4ed8" stroke="#1e293b" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M100 153 L117 144 L120 160 Z" fill="#1d4ed8" stroke="#1e293b" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M96 156 L87 176 L96 173 Z" fill="#2563eb" stroke="#1e293b" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M104 156 L113 176 L104 173 Z" fill="#2563eb" stroke="#1e293b" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="95" y="149" width="10" height="9" rx="3" fill="#3b82f6" stroke="#1e293b" stroke-width="2"/>
+          <!-- 青いカーディガン（胴体＆袖） -->
+          <path d="M74 142 C62 146, 56 175, 52 200 L70 202 L78 158 Z" fill="#2b8ac6" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M126 142 C138 146, 144 175, 148 200 L130 202 L122 158 Z" fill="#2b8ac6" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- 左腕（指示棒を持つ腕） -->
+          <path d="M68 146 C48 154, 38 140, 34 126 L46 122 C50 132, 56 138, 70 136 Z" fill="#2b8ac6" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- 指示棒 -->
+          <line x1="42" y1="132" x2="18" y2="62" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+          <line x1="42" y1="132" x2="18" y2="62" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+          <polygon points="18,62 14,52 22,54" fill="#94a3b8" stroke="#1e293b" stroke-width="1.5"/>
+          <line x1="42" y1="132" x2="36" y2="114" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>
+          <!-- 左手 -->
+          <circle cx="39" cy="122" r="7" fill="#ffe5d9" stroke="#2c221e" stroke-width="2"/>
+          <!-- 青い教科書 -->
+          <rect x="102" y="156" width="26" height="34" rx="3" transform="rotate(-10 115 173)" fill="#38bdf8" stroke="#1e293b" stroke-width="2.2"/>
+          <line x1="106" y1="158" x2="111" y2="189" stroke="#ffffff" stroke-width="2.5"/>
+          <!-- 右腕＆手（本を抱える） -->
+          <path d="M132 146 C148 158, 146 178, 122 180 L120 169 C134 168, 134 158, 126 152 Z" fill="#2b8ac6" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="118" cy="175" r="6.5" fill="#ffe5d9" stroke="#2c221e" stroke-width="2"/>
+          <!-- 顔の輪郭 -->
+          <path d="M62 82 C62 46, 138 46, 138 82 C138 114, 122 132, 100 132 C78 132, 62 114, 62 82 Z" fill="#ffe5d9" stroke="#2c221e" stroke-width="2.5"/>
+          <!-- ほっぺのチーク -->
+          <ellipse cx="75" cy="105" rx="6" ry="3.5" fill="#fda4af" opacity="0.7"/>
+          <ellipse cx="125" cy="105" rx="6" ry="3.5" fill="#fda4af" opacity="0.7"/>
+          <!-- 大きな青い瞳 -->
+          <ellipse cx="82" cy="92" rx="8.5" ry="10" fill="#1e3a8a"/>
+          <ellipse cx="82" cy="94" rx="6.5" ry="7" fill="#3b82f6"/>
+          <circle cx="79" cy="88" r="3" fill="#ffffff"/>
+          <circle cx="85" cy="96" r="1.5" fill="#ffffff"/>
+          <ellipse cx="118" cy="92" rx="8.5" ry="10" fill="#1e3a8a"/>
+          <ellipse cx="118" cy="94" rx="6.5" ry="7" fill="#3b82f6"/>
+          <circle cx="115" cy="88" r="3" fill="#ffffff"/>
+          <circle cx="121" cy="96" r="1.5" fill="#ffffff"/>
+          <!-- 眉毛＆笑顔の口 -->
+          <path d="M74 77 Q82 74 89 77" fill="none" stroke="#4a3b32" stroke-width="2" stroke-linecap="round"/>
+          <path d="M111 77 Q118 74 126 77" fill="none" stroke="#4a3b32" stroke-width="2" stroke-linecap="round"/>
+          <path d="M94 113 Q100 119 106 113" fill="none" stroke="#9f1239" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- 前髪・ショートボブヘア -->
+          <path d="M56 88 C52 50, 76 32, 100 32 C124 32, 148 50, 144 88 C142 104, 138 118, 134 124 C135 106, 133 88, 126 76 C121 86, 115 90, 110 82 C105 90, 96 90, 91 81 C85 90, 78 88, 74 76 C67 88, 65 106, 66 124 C62 118, 58 104, 56 88 Z" fill="#635147" stroke="#2c221e" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- 髪のハイライト -->
+          <path d="M74 56 Q86 52 94 56 M106 56 Q116 52 126 56" fill="none" stroke="#8c766a" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- 黄色い星型ヘアピン -->
+          <path d="M126 54 L139 50 L137 59 Z" fill="#3b82f6" stroke="#1e293b" stroke-width="1.5"/>
+          <polygon points="124,45 127,51 134,52 129,57 130,63 124,60 118,63 119,57 114,52 121,51" fill="#facc15" stroke="#854d0e" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      `;
+    }
+
+    // キャラクター表示の描画更新（表紙・練習画面）
+    function renderCharacters() {
+      const coverBox = document.getElementById('cover-char-container');
+      const miniBox = document.getElementById('practice-char-avatar');
+      if (state.customCharUrl) {
+        if (coverBox) {
+          coverBox.innerHTML = `<img src="${state.customCharUrl}" alt="ナビゲーター" class="w-full h-full object-contain rounded-2xl" />`;
+        }
+        if (miniBox) {
+          miniBox.innerHTML = `<img src="${state.customCharUrl}" alt="ナビゲーター" class="w-full h-full object-cover object-top" />`;
+        }
+      } else {
+        if (coverBox) coverBox.innerHTML = getCharacterSvg(false);
+        if (miniBox) miniBox.innerHTML = getCharacterSvg(true);
+      }
+    }
+
+    // 原画ファイル選択ダイアログを開く
+    function triggerCharacterUpload() {
+      const input = document.getElementById('char-file-input');
+      if (input) input.click();
+    }
+
+    // 選択された原画ファイルをプレビュー反映
+    function handleCharacterImageUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (state.customCharUrl) {
+        URL.revokeObjectURL(state.customCharUrl);
+      }
+      state.customCharUrl = URL.createObjectURL(file);
+      renderCharacters();
+      showToast('キャラクター画像を差し替えました！', 'info');
+    }
+
+    // キャラクターの吹き出しセリフ更新
+    function updateCharacterSpeech(mode, extraText = '') {
+      const speechEl = document.getElementById('char-speech-text');
+      if (!speechEl) return;
+      if (mode === 'start') {
+        const msgByLvl = {
+          beginner: 'まずは意味の塊ごとに並べよう！迷ったら「語順の型」や「赤線ヒント」を使ってね！',
+          intermediate: '中級はノーヒント勝負！前置詞や助動詞の位置に気をつけて組み立てよう！',
+          advanced: '上級チャレンジ！ダミーの単語に惑わされず、正確な英文を完成させよう！'
+        };
+        speechEl.textContent = msgByLvl[state.level];
+      } else if (mode === 'progress') {
+        speechEl.textContent = 'いいね！その調子で次のパーツをつなげよう！';
+      } else if (mode === 'hint') {
+        speechEl.textContent = '赤線の部分に注目！英語ではこの順番で言葉を並べるよ！';
+      } else if (mode === 'error') {
+        speechEl.textContent = `おっと！「${extraText}」はまだ先だよ。主語や動詞の順番を思い出してみよう！`;
+      } else if (mode === 'solved') {
+        speechEl.textContent = state.lastEarnedStars === 3
+          ? 'パーフェクト！ノーヒント＆ノーミスで大正解だよ！すごい！'
+          : '正解おめでとう！下の「学習ポイント」もチェックしておこうね！';
+      }
+    }
+
+    // 表紙画面での難易度選択
+    function selectCoverLevel(level) {
+      state.level = level;
+      ['beginner', 'intermediate', 'advanced'].forEach(lvl => {
+        const btn = document.getElementById(`cover-lvl-${lvl}`);
+        if (!btn) return;
+        if (lvl === level) {
+          btn.className = 'cover-lvl-btn p-2.5 sm:p-3 rounded-xl border-2 border-sky-600 bg-white text-left shadow-sm transition';
+          btn.querySelector('div').className = 'text-xs sm:text-sm font-bold text-sky-700';
+        } else {
+          btn.className = 'cover-lvl-btn p-2.5 sm:p-3 rounded-xl border border-slate-200 bg-white text-left hover:border-sky-300 transition';
+          btn.querySelector('div').className = 'text-xs sm:text-sm font-bold text-slate-800';
+        }
+      });
+      setLevel(level);
+    }
+
+    // 表紙画面から練習をスタート
+    function startPracticeFromCover() {
+      switchMainTab('practice');
+    }
+
+    // 習得率＆獲得スター集計とダッシュボード更新
+    function updateScoreDisplays() {
+      const scores = Object.values(state.bestScores);
+      const starsList = Object.values(state.bestStars);
+      const totalStars = starsList.reduce((sum, s) => sum + s, 0);
+      const clearedCount = scores.length;
+      const masteryRate = Math.round((clearedCount / QUESTIONS.length) * 100);
+      const perfectCount = starsList.filter(s => s === 3).length;
+
+      const headerStars = document.getElementById('header-total-stars');
+      if (headerStars) headerStars.textContent = totalStars;
+
+      const coverRate = document.getElementById('cover-mastery-rate');
+      const coverBar = document.getElementById('cover-mastery-bar');
+      const coverStars = document.getElementById('cover-total-stars');
+      const coverCleared = document.getElementById('cover-cleared-count');
+      const coverPerfect = document.getElementById('cover-perfect-count');
+      if (coverRate) coverRate.textContent = masteryRate;
+      if (coverBar) coverBar.style.width = `${masteryRate}%`;
+      if (coverStars) coverStars.textContent = totalStars;
+      if (coverCleared) coverCleared.textContent = clearedCount;
+      if (coverPerfect) coverPerfect.textContent = perfectCount;
+    }
+
+    // メインタブ切り替え（表紙 / 英作文練習 / 単元選択・文法チェック）
+    function switchMainTab(tab) {
+      state.mainTab = tab;
+      const coverView = document.getElementById('view-cover');
+      const practiceView = document.getElementById('view-practice');
+      const grammarView = document.getElementById('view-grammar');
+
+      const tabCover = document.getElementById('tab-cover');
+      const tabPractice = document.getElementById('tab-practice');
+      const tabGrammar = document.getElementById('tab-grammar');
+
+      const activeBtnClass = 'px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-sky-700 shadow-sm';
+      const inactiveBtnClass = 'px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900';
+
+      coverView.classList.add('hidden');
+      practiceView.classList.add('hidden');
+      grammarView.classList.add('hidden');
+
+      tabCover.className = inactiveBtnClass;
+      tabPractice.className = inactiveBtnClass;
+      tabGrammar.className = inactiveBtnClass;
+
+      if (tab === 'cover') {
+        coverView.classList.remove('hidden');
+        tabCover.className = activeBtnClass;
+        updateLearnedBadge();
+        updateScoreDisplays();
+      } else if (tab === 'practice') {
+        practiceView.classList.remove('hidden');
+        tabPractice.className = activeBtnClass;
+        syncPracticeAfterFilterChange();
+      } else {
+        grammarView.classList.remove('hidden');
+        tabGrammar.className = activeBtnClass;
+        renderGrammarList();
+      }
+    }
+
+    // 現在のフィルタ条件（習ったパートのみ ＋ パート選択）に合致する問題一覧を取得
+    function getFilteredQuestions() {
+      return QUESTIONS.filter(q => {
+        const unitMatch = state.unitFilter === 'ALL' || q.unitGroup === state.unitFilter;
+        const learnedMatch = !state.onlyLearned || state.learnedIds.has(q.id);
+        return unitMatch && learnedMatch;
+      });
+    }
+
+    // 習った問題数のバッジ更新
+    function updateLearnedBadge() {
+      const badge = document.getElementById('learned-count-badge');
+      if (badge) {
+        badge.textContent = `${state.learnedIds.size} / ${QUESTIONS.length}問`;
+      }
+      const coverLearned = document.getElementById('cover-learned-count');
+      if (coverLearned) {
+        coverLearned.textContent = `${state.learnedIds.size}問`;
+      }
+    }
+
+    // 練習画面の「習ったパートだけ出題する」チェック切り替え
+    function toggleOnlyLearnedMode() {
+      const checkbox = document.getElementById('toggle-only-learned');
+      state.onlyLearned = checkbox.checked;
+      syncPracticeAfterFilterChange();
+    }
+
+    // パートフィルタ変更時
+    function onFilterChange() {
+      state.unitFilter = document.getElementById('unit-filter').value;
+      syncPracticeAfterFilterChange();
+    }
+
+    // フィルタ条件が変わったときにセレクトボックスと現在の問題を同期
+    function syncPracticeAfterFilterChange() {
+      updateLearnedBadge();
+      const filtered = getFilteredQuestions();
+      renderQuestionSelector();
+
+      if (filtered.length === 0) {
+        showToast('条件に合う問題がありません。「単元・文法」タブで出題したい問題をONにしてください。', 'error');
+        return;
+      }
+
+      if (!filtered.some(q => q.id === state.currentQuestionId)) {
+        loadQuestion(filtered[0].id);
+      }
+    }
+
+    // 習った・未習の個別トグル
+    function toggleLearnedUnit(id) {
+      if (state.learnedIds.has(id)) {
+        state.learnedIds.delete(id);
+      } else {
+        state.learnedIds.add(id);
+      }
+      updateLearnedBadge();
+      renderGrammarList();
+    }
+
+    // 教科書進度プリセットの一括適用
+    function applyLearnedPreset(preset) {
+      state.learnedIds.clear();
+      if (preset === 'U1_ALL') {
+        QUESTIONS.filter(q => q.id <= 17).forEach(q => state.learnedIds.add(q.id));
+      } else if (preset === 'U2_ALL') {
+        QUESTIONS.filter(q => q.id <= 28).forEach(q => state.learnedIds.add(q.id));
+      } else if (preset === 'U3_LR1') {
+        QUESTIONS.filter(q => q.id <= 46).forEach(q => state.learnedIds.add(q.id));
+      } else if (preset === 'U4_U5') {
+        QUESTIONS.filter(q => q.id >= 47 && q.id <= 68).forEach(q => state.learnedIds.add(q.id));
+      } else if (preset === 'U6_U7') {
+        QUESTIONS.filter(q => q.id >= 69 && q.id <= 90).forEach(q => state.learnedIds.add(q.id));
+      } else if (preset === 'ALL') {
+        QUESTIONS.forEach(q => state.learnedIds.add(q.id));
+      }
+      updateLearnedBadge();
+      renderGrammarList();
+      const msgMap = {
+        U1_ALL: '「Unit 1 まで（17問）」を出題ONにしました',
+        U2_ALL: '「Unit 2 まで（28問）」を出題ONにしました',
+        U3_LR1: '「Unit 3〜Let\'s Read 1 まで（46問）」を出題ONにしました',
+        U4_U5: '「Unit 4〜5 のみ（22問）」を出題ONにしました',
+        U6_U7: '「Unit 6〜7・Let\'s Read 2（22問）」を出題ONにしました',
+        ALL: '「全90問」を出題ONにしました',
+        NONE: 'すべての問題を出題OFFにしました'
+      };
+      showToast(msgMap[preset], 'info');
+    }
+
+    // インライン文法ガイドの開閉
+    function toggleInlineGrammarGuide() {
+      const panel = document.getElementById('inline-grammar-panel');
+      panel.classList.toggle('hidden');
+    }
+
+    // 文法チェック一覧のフィルタ切り替え
+    function filterGrammarCards(unitMajor) {
+      state.grammarFilter = unitMajor;
+      document.querySelectorAll('.gfilter-btn').forEach(btn => {
+        btn.className = 'gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200';
+      });
+      const active = document.getElementById(`gfilter-${unitMajor}`);
+      if (active) {
+        active.className = 'gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white';
+      }
+      renderGrammarList();
+    }
+
+    // 単元選択＆文法チェック一覧の描画
+    function renderGrammarList() {
+      const container = document.getElementById('grammar-cards-list');
+      const filtered = state.grammarFilter === 'ALL'
+        ? QUESTIONS
+        : QUESTIONS.filter(q => q.unitMajor === state.grammarFilter);
+
+      container.innerHTML = filtered.map(q => {
+        const g = GRAMMAR_FORMULAS[q.id] || { formula: q.en, desc: q.note };
+        const isLearned = state.learnedIds.has(q.id);
+        const bestStar = state.bestStars[q.id];
+        const starBadge = bestStar
+          ? `<span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-amber-100 text-amber-800">${'★'.repeat(bestStar)}${'☆'.repeat(3 - bestStar)}</span>`
+          : '';
+        const cardBorderClass = isLearned
+          ? 'bg-white border-slate-200 shadow-sm'
+          : 'bg-slate-100/80 border-slate-200/70 opacity-75';
+        const toggleBtnClass = isLearned
+          ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+          : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50';
+
+        return `
+          <div class="rounded-2xl p-4 sm:p-5 border transition ${cardBorderClass}">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2 py-0.5 text-xs font-bold rounded-md bg-slate-200/70 text-slate-700">Q.${q.id}</span>
+                <span class="px-2 py-0.5 text-xs font-bold rounded-md bg-sky-50 text-sky-700">${q.unitLabel}</span>
+                <h3 class="text-sm sm:text-base font-bold text-slate-800">${q.topic}</h3>
+                ${starBadge}
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="toggleLearnedUnit(${q.id})" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${toggleBtnClass}">
+                  ${isLearned ? '☑ 習った（出題ON）' : '☐ 未習（出題OFF）'}
+                </button>
+                <button type="button" onclick="jumpToQuestionFromGrammar(${q.id})" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-600 hover:text-white transition">
+                  解く →
+                </button>
+              </div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 mb-2">
+              <span class="text-[11px] font-bold text-sky-600 block mb-0.5">英語の語順の型（公式）</span>
+              <p class="text-xs sm:text-sm font-bold text-slate-900">${g.formula}</p>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-2">${g.desc}</p>
+            <div class="text-xs text-slate-500 pt-2 border-t border-slate-200/60 flex flex-wrap gap-x-4 gap-y-1">
+              <span><strong>例文：</strong>${q.jp}</span>
+              <span class="text-sky-700 font-semibold">${q.en}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 文法一覧から特定の問題へ直接移動して解く
+    function jumpToQuestionFromGrammar(id) {
+      if (!state.learnedIds.has(id)) {
+        state.learnedIds.add(id);
+        updateLearnedBadge();
+      }
+      state.unitFilter = 'ALL';
+      document.getElementById('unit-filter').value = 'ALL';
+      switchMainTab('practice');
+      loadQuestion(id);
+    }
+
+    // 配列シャッフル関数
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // 現在の問題オブジェクト取得
+    function getCurrentQuestion() {
+      return QUESTIONS.find(q => q.id === state.currentQuestionId) || QUESTIONS[0];
+    }
+
+    // 現在のレベルに応じた正解トークン配列を取得
+    function getTargetTokens(q) {
+      if (state.level === 'beginner') return q.beginner;
+      if (state.level === 'intermediate') return q.intermediate;
+      return q.advanced;
+    }
+
+    // 問題セレクトボックスの描画
+    function renderQuestionSelector() {
+      const select = document.getElementById('question-select');
+      const filtered = getFilteredQuestions();
+
+      if (filtered.length === 0) {
+        select.innerHTML = `<option value="">（出題対象の問題が0問です）</option>`;
+        return;
+      }
+
+      select.innerHTML = filtered.map(q =>
+        `<option value="${q.id}" ${q.id === state.currentQuestionId ? 'selected' : ''}>Q.${q.id} [${q.unitLabel}] ${q.topic}</option>`
+      ).join('');
+    }
+
+    // 問題選択時
+    function onQuestionSelectChange() {
+      const val = document.getElementById('question-select').value;
+      if (!val) return;
+      const id = Number(val);
+      loadQuestion(id);
+    }
+
+    // 難易度レベル切り替え
+    function setLevel(newLevel) {
+      state.level = newLevel;
+
+      document.querySelectorAll('.level-tab').forEach(btn => {
+        btn.className = 'level-tab px-2.5 py-1 text-xs font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900';
+      });
+      const activeBtn = document.getElementById(`btn-level-${newLevel}`);
+      if (activeBtn) {
+        activeBtn.className = 'level-tab px-2.5 py-1 text-xs font-bold rounded-lg transition-all bg-sky-600 text-white shadow-sm';
+      }
+
+      const descMap = {
+        beginner: '初級：意味の塊ごとに並べて英語の骨格をつかもう（赤線ヒント・語順ガイド対応）',
+        intermediate: '中級：前置詞や助動詞が分離！ノーヒントで文法要素を組み立てよう',
+        advanced: '上級：1単語ずつ＋ダミー選択肢あり！ノーヒントで正確な語法と時制を見抜こう'
+      };
+      document.getElementById('level-desc').textContent = descMap[newLevel];
+
+      // 初級のみヒント機能（「語順の型を見る」「次の語順ヒント」）を表示し、中級・上級では非表示にする
+      const isBeginner = newLevel === 'beginner';
+      const guideBtn = document.getElementById('btn-grammar-guide');
+      const hintBtn = document.getElementById('btn-hint');
+      const guidePanel = document.getElementById('inline-grammar-panel');
+      if (guideBtn) guideBtn.classList.toggle('hidden', !isBeginner);
+      if (hintBtn) hintBtn.classList.toggle('hidden', !isBeginner);
+      if (!isBeginner && guidePanel) guidePanel.classList.add('hidden');
+
+      loadQuestion(state.currentQuestionId);
+    }
+
+    // 問題の読み込みと初期化
+    function loadQuestion(id) {
+      state.currentQuestionId = id;
+      const q = getCurrentQuestion();
+      const targetTokens = getTargetTokens(q);
+
+      let poolItems = targetTokens.map((text, idx) => ({
+        id: `target-${idx}`,
+        text,
+        used: false
+      }));
+
+      if (state.level === 'advanced' && q.dummies && q.dummies.length > 0) {
+        const dummyItems = q.dummies.map((text, idx) => ({
+          id: `dummy-${idx}`,
+          text,
+          used: false
+        }));
+        poolItems = poolItems.concat(dummyItems);
+      }
+
+      state.choicePool = shuffleArray(poolItems);
+      state.selectedTokens = [];
+      state.hintActive = false;
+      state.hintUsedCount = 0;
+      state.mistakeCount = 0;
+      state.isSolved = false;
+
+      const selectEl = document.getElementById('question-select');
+      if (selectEl) selectEl.value = String(id);
+
+      updateCharacterSpeech('start');
+      renderAll();
+    }
+
+    // 画面全体の描画更新
+    function renderAll() {
+      const q = getCurrentQuestion();
+      const targetTokens = getTargetTokens(q);
+
+      document.getElementById('badge-id').textContent = `Q.${q.id}`;
+      document.getElementById('badge-unit').textContent = q.unitLabel;
+      document.getElementById('badge-topic').textContent = q.topic;
+
+      const guide = GRAMMAR_FORMULAS[q.id] || { formula: q.en, desc: q.note };
+      document.getElementById('inline-grammar-formula').textContent = guide.formula;
+      document.getElementById('inline-grammar-desc').textContent = guide.desc;
+
+      const stars = (state.hintUsedCount === 0 && state.mistakeCount === 0)
+        ? '★★★'
+        : (state.hintUsedCount + state.mistakeCount <= 2 ? '★★☆' : '★☆☆');
+      document.getElementById('stars-display').textContent = stars;
+
+      renderJapaneseWithHint(q, targetTokens);
+      renderAnswerArea(targetTokens);
+      renderChoicesArea();
+
+      const resultCard = document.getElementById('result-card');
+      if (state.isSolved) {
+        resultCard.classList.remove('hidden');
+        document.getElementById('result-english').textContent = q.en;
+        document.getElementById('result-note').textContent = q.note;
+        const earnedStarStr = '★'.repeat(state.lastEarnedStars) + '☆'.repeat(3 - state.lastEarnedStars);
+        document.getElementById('result-score-pill').textContent = `${earnedStarStr} 獲得！`;
+
+        const ratingMsg = state.lastEarnedStars === 3
+          ? 'ノーヒント＆ノーミスでマスターしました！'
+          : `クリア達成！（ヒント ${state.hintUsedCount}回 / ミス ${state.mistakeCount}回）`;
+        document.getElementById('result-rating-text').textContent = ratingMsg;
+
+        const nextLvlBtn = document.getElementById('btn-next-level');
+        if (state.level === 'beginner') {
+          nextLvlBtn.classList.remove('hidden');
+          nextLvlBtn.textContent = '同じ文を「中級」で解く';
+        } else if (state.level === 'intermediate') {
+          nextLvlBtn.classList.remove('hidden');
+          nextLvlBtn.textContent = '同じ文を「上級」で解く';
+        } else {
+          nextLvlBtn.classList.add('hidden');
+        }
+      } else {
+        resultCard.classList.add('hidden');
+      }
+    }
+
+    // 日本語文と赤線ヒントの描画ロジック
+    function renderJapaneseWithHint(q, targetTokens) {
+      const jpContainer = document.getElementById('japanese-display');
+      const specialBanner = document.getElementById('special-hint-banner');
+      const specialText = document.getElementById('special-hint-text');
+
+      const nextSlotIndex = state.selectedTokens.length;
+
+      // 中級・上級またはヒント未発動時はヒントを一切表示しない
+      if (state.level !== 'beginner' || !state.hintActive || state.isSolved || nextSlotIndex >= targetTokens.length) {
+        jpContainer.textContent = q.jp;
+        specialBanner.classList.add('hidden');
+        return;
+      }
+
+      const nextExpectedWord = targetTokens[nextSlotIndex];
+      const targetJpIdx = q.idxMap[nextSlotIndex];
+
+      if (targetJpIdx === -1) {
+        jpContainer.textContent = q.jp;
+        specialBanner.classList.remove('hidden');
+        specialText.innerHTML = `次は日本語にそのまま訳されない<strong>英語特有の機能語（形式主語 it / 接続詞 that など）</strong>が入ります！（ヒント：最初の文字は <strong>"${nextExpectedWord[0]}"</strong>）`;
+      } else {
+        specialBanner.classList.add('hidden');
+        jpContainer.innerHTML = q.jpParts.map((part, idx) => {
+          if (idx === targetJpIdx) {
+            return `<span class="jp-red-underline mx-0.5">${part}</span>`;
+          }
+          return `<span>${part}</span>`;
+        }).join('');
+      }
+    }
+
+    // 解答エリアの描画
+    function renderAnswerArea(targetTokens) {
+      const container = document.getElementById('selected-tokens-container');
+      const counter = document.getElementById('progress-counter');
+      counter.textContent = `${state.selectedTokens.length} / ${targetTokens.length} パーツ`;
+
+      if (state.selectedTokens.length === 0) {
+        container.innerHTML = `<span class="text-sm text-slate-400 select-none">下の選択肢をタップして英文を組み立てましょう</span>`;
+        return;
+      }
+
+      container.innerHTML = state.selectedTokens.map((token, index) => `
+        <button
+          type="button"
+          onclick="removeToken(${index})"
+          ${state.isSolved ? 'disabled' : ''}
+          class="px-3.5 py-2 rounded-xl font-bold text-sm sm:text-base bg-sky-600 text-white shadow-sm hover:bg-sky-700 active:scale-95 transition animate-pop disabled:opacity-95 disabled:cursor-default"
+        >
+          ${token.text}
+        </button>
+      `).join('');
+    }
+
+    // 選択肢プールの描画
+    function renderChoicesArea() {
+      const container = document.getElementById('choices-container');
+      container.innerHTML = state.choicePool.map(item => {
+        if (item.used) {
+          return `
+            <span class="px-3.5 py-2 rounded-xl font-bold text-sm sm:text-base bg-slate-200/70 text-transparent border border-slate-200 select-none">
+              ${item.text}
+            </span>
+          `;
+        }
+        return `
+          <button
+            type="button"
+            onclick="selectChoice('${item.id}')"
+            ${state.isSolved ? 'disabled' : ''}
+            class="px-3.5 py-2.5 rounded-xl font-bold text-sm sm:text-base bg-white text-slate-800 border-2 border-slate-200 shadow-sm hover:border-sky-400 hover:bg-sky-50/40 active:scale-95 transition"
+          >
+            ${item.text}
+          </button>
+        `;
+      }).join('');
+    }
+
+    // 選択肢タップ時の処理（語順チェック付き）
+    function selectChoice(choiceId) {
+      if (state.isSolved) return;
+
+      const q = getCurrentQuestion();
+      const targetTokens = getTargetTokens(q);
+      const nextSlotIndex = state.selectedTokens.length;
+      const expectedText = targetTokens[nextSlotIndex];
+
+      const chosenItem = state.choicePool.find(item => item.id === choiceId);
+      if (!chosenItem || chosenItem.used) return;
+
+      if (chosenItem.text !== expectedText) {
+        triggerErrorFeedback(chosenItem.text);
+        return;
+      }
+
+      chosenItem.used = true;
+      state.selectedTokens.push({ id: chosenItem.id, text: chosenItem.text });
+      state.hintActive = false;
+
+      if (state.selectedTokens.length === targetTokens.length) {
+        state.isSolved = true;
+        const rawScore = 100 - (state.hintUsedCount * 20) - (state.mistakeCount * 10);
+        const earned = Math.max(10, rawScore);
+        const earnedStars = earned === 100 ? 3 : (earned >= 70 ? 2 : 1);
+        state.lastEarnedScore = earned;
+        state.lastEarnedStars = earnedStars;
+        const prevBest = state.bestScores[q.id] || 0;
+        const prevStars = state.bestStars[q.id] || 0;
+        state.bestScores[q.id] = Math.max(prevBest, earned);
+        state.bestStars[q.id] = Math.max(prevStars, earnedStars);
+        updateScoreDisplays();
+        updateCharacterSpeech('solved');
+        renderAll();
+        speakAnswer();
+      } else {
+        updateCharacterSpeech('progress');
+        renderAll();
+      }
+    }
+
+    // 解答スロットから最後の単語を取り消す
+    function removeToken(slotIndex) {
+      if (state.isSolved) return;
+      const removed = state.selectedTokens.splice(slotIndex);
+      removed.forEach(rem => {
+        const poolItem = state.choicePool.find(p => p.id === rem.id);
+        if (poolItem) poolItem.used = false;
+      });
+      state.hintActive = false;
+      renderAll();
+    }
+
+    // ヒントボタン押下
+    function activateHint() {
+      if (state.isSolved) return;
+      if (!state.hintActive) {
+        state.hintActive = true;
+        state.hintUsedCount += 1;
+      }
+      updateCharacterSpeech('hint');
+      renderAll();
+    }
+
+    // 誤答時のフィードバック（シェイク＆トースト）
+    let toastTimer = null;
+    function triggerErrorFeedback(wrongWord) {
+      state.mistakeCount += 1;
+      updateCharacterSpeech('error', wrongWord);
+      renderAll();
+
+      const answerArea = document.getElementById('answer-area');
+      answerArea.classList.remove('animate-shake');
+      void answerArea.offsetWidth;
+      answerArea.classList.add('animate-shake');
+
+      showToast(`「${wrongWord}」はまだ入りません！英語の語順（誰が・どうする・何を…）を意識してみよう`, 'error');
+    }
+
+    // トースト表示
+    function showToast(message, type = 'error') {
+      const toast = document.getElementById('feedback-toast');
+      toast.textContent = message;
+      toast.className = type === 'error'
+        ? 'rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-center bg-rose-100 text-rose-800 border border-rose-200 animate-pop'
+        : 'rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-center bg-sky-100 text-sky-800 border border-sky-200 animate-pop';
+      toast.classList.remove('hidden');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2800);
+    }
+
+    // やり直し
+    function resetCurrentQuestion() {
+      loadQuestion(state.currentQuestionId);
+    }
+
+    // 同じ問題を1つ上の難易度で解き直す
+    function upgradeLevelForSameQuestion() {
+      if (state.level === 'beginner') setLevel('intermediate');
+      else if (state.level === 'intermediate') setLevel('advanced');
+    }
+
+    // 次の問題へ（フィルタされたリスト内を移動）
+    function nextQuestion() {
+      const filtered = getFilteredQuestions();
+      if (filtered.length === 0) return;
+      const currentIdx = filtered.findIndex(q => q.id === state.currentQuestionId);
+      const nextIdx = (currentIdx + 1) % filtered.length;
+      loadQuestion(filtered[nextIdx].id);
+    }
+
+    // 前の問題へ（フィルタされたリスト内を移動）
+    function prevQuestion() {
+      const filtered = getFilteredQuestions();
+      if (filtered.length === 0) return;
+      const currentIdx = filtered.findIndex(q => q.id === state.currentQuestionId);
+      const prevIdx = (currentIdx - 1 + filtered.length) % filtered.length;
+      loadQuestion(filtered[prevIdx].id);
+    }
+
+    // Web Speech API による英語音声読み上げ
+    function speakAnswer() {
+      if (!('speechSynthesis' in window)) return;
+      const q = getCurrentQuestion();
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(q.en);
+      utter.lang = 'en-US';
+      utter.rate = 0.95;
+      window.speechSynthesis.speak(utter);
+    }
+
+    // 初期起動
+    window.onload = () => {
+      renderCharacters();
+      updateLearnedBadge();
+      updateScoreDisplays();
+      renderQuestionSelector();
+      loadQuestion(1);
+      switchMainTab('cover');
+    };
+  </script>
+</body>
+</html>
