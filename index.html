@@ -87,19 +87,22 @@
         <!-- 獲得スターバッジ -->
         <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl" title="獲得したスターの合計">
           <span class="text-sm text-amber-500">★</span>
-          <span class="text-xs font-bold text-amber-900"><span id="header-total-stars">0</span> <span class="text-[10px] font-normal text-amber-700">/ 270</span></span>
+          <span class="text-xs font-bold text-amber-900"><span id="header-total-stars">0</span> <span class="text-[10px] font-normal text-amber-700">/ <span id="header-max-stars">270</span></span></span>
         </div>
 
-        <!-- メインモード切り替えタブ（表紙 / 練習 / 単元・文法） -->
+        <!-- メインモード切り替えタブ（表紙 / 練習 / 単元・文法 / 成績分析） -->
         <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200" role="tablist" aria-label="画面切り替え">
-          <button type="button" id="tab-cover" onclick="switchMainTab('cover')" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-sky-700 shadow-sm">
+          <button type="button" id="tab-cover" onclick="switchMainTab('cover')" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-sky-700 shadow-sm">
             🏠 表紙
           </button>
-          <button type="button" id="tab-practice" onclick="switchMainTab('practice')" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <button type="button" id="tab-practice" onclick="switchMainTab('practice')" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
             ✏️ 練習
           </button>
-          <button type="button" id="tab-grammar" onclick="switchMainTab('grammar')" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <button type="button" id="tab-grammar" onclick="switchMainTab('grammar')" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
             📖 単元・文法
+          </button>
+          <button type="button" id="tab-analysis" onclick="switchMainTab('analysis')" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+            📊 成績分析
           </button>
         </div>
       </div>
@@ -117,7 +120,7 @@
         <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6">
           <div class="flex-1 text-center sm:text-left">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 text-xs font-bold mb-3">
-              <span>📘 中学2年 教科書対応（Unit 0〜Unit 7・Let's Read 1〜2 全90問）</span>
+              <span id="cover-deck-badge">📘 中学2年 教科書対応（Unit 0〜Unit 7・Let's Read 1〜2 全90問）</span>
             </div>
             <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">
               中2教科書の重要文をマスターしよう！<br class="hidden sm:inline" />選択式・英作文トレーニング
@@ -149,17 +152,29 @@
             <div class="w-full bg-sky-200/70 h-1.5 rounded-full overflow-hidden mt-1.5 mb-1">
               <div id="cover-mastery-bar" class="bg-sky-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <span class="text-[10px] font-semibold text-sky-700"><span id="cover-cleared-count">0</span> / 90問 クリア</span>
+            <span class="text-[10px] font-semibold text-sky-700"><span id="cover-cleared-count">0</span> / <span id="cover-total-questions">90</span>問 クリア</span>
           </div>
           <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center">
             <span class="text-[11px] font-bold text-amber-800 block mb-0.5">獲得スター</span>
-            <div class="text-xl sm:text-2xl font-bold text-amber-500">★ <span id="cover-total-stars" class="text-amber-600">0</span><span class="text-xs font-semibold text-amber-800 ml-0.5">/ 270</span></div>
+            <div class="text-xl sm:text-2xl font-bold text-amber-500">★ <span id="cover-total-stars" class="text-amber-600">0</span><span class="text-xs font-semibold text-amber-800 ml-0.5">/ <span id="cover-max-stars">270</span></span></div>
             <span class="text-[10px] font-semibold text-amber-700 mt-1">1問につき最大3つ</span>
           </div>
           <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3 sm:p-4 text-center flex flex-col justify-center">
             <span class="text-[11px] font-bold text-emerald-800 block mb-0.5">ノーヒント満点</span>
             <div class="text-xl sm:text-2xl font-bold text-emerald-600"><span id="cover-perfect-count">0</span><span class="text-xs font-semibold text-emerald-800 ml-0.5">問</span></div>
             <span class="text-[10px] font-semibold text-emerald-700 mt-1">★★★ マスター数</span>
+          </div>
+        </div>
+
+        <!-- 生徒情報＆自動記録ステータス（表紙で入力すると1問ごとに自動送信） -->
+        <div class="bg-sky-50/60 rounded-2xl p-4 border border-sky-200/80 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="text-xs font-bold text-sky-900">👤 学習者情報（生徒IDと氏名を入力すると1問ごとに自動記録されます）</span>
+            <span id="auto-sync-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🟢 自動送信ON（操作不要）</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <input type="text" id="cover-student-id" placeholder="生徒ID (例: 21015)" oninput="syncStudentInputsFromCover()" class="bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            <input type="text" id="cover-student-name" placeholder="氏名 (例: 山田 太郎)" oninput="syncStudentInputsFromCover()" class="bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500" />
           </div>
         </div>
 
@@ -456,7 +471,7 @@
       <!-- 一括設定ボタン（教科書進度プリセット） -->
       <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 mt-3 mb-4">
         <span class="text-xs font-bold text-slate-500 block mb-2">⚡ 教科書の進度で一括設定する：</span>
-        <div class="flex flex-wrap gap-2">
+        <div id="grammar-presets-container" class="flex flex-wrap gap-2">
           <button type="button" onclick="applyLearnedPreset('U1_ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-sky-50 hover:border-sky-300 transition">
             Unit 1 まで (17問)
           </button>
@@ -483,7 +498,7 @@
 
       <!-- パート表示フィルタボタン -->
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex flex-wrap gap-1.5">
+        <div id="grammar-filters-container" class="flex flex-wrap gap-1.5">
           <button type="button" onclick="filterGrammarCards('ALL')" id="gfilter-ALL" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white">すべて (90)</button>
           <button type="button" onclick="filterGrammarCards('Unit 0')" id="gfilter-Unit 0" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 0 (4)</button>
           <button type="button" onclick="filterGrammarCards('Unit 1')" id="gfilter-Unit 1" class="gfilter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">Unit 1 (13)</button>
@@ -507,9 +522,135 @@
     </div>
   </section>
 
+  <!-- 成績分析＆スプレッドシート集計ビュー -->
+  <section id="view-analysis" class="hidden flex-1 max-w-3xl w-full mx-auto px-4 py-5 flex flex-col gap-4 animate-pop">
+    <!-- 学習者情報＆スプレッドシート出力パネル -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800">📊 成績分析表 ＆ スプレッドシート集計</h2>
+          <p class="text-xs text-slate-500 mt-0.5">単元別の定着度を確認し、Googleスプレッドシートの「成績データ」へそのまま転記・集計できます。</p>
+        </div>
+        <button type="button" onclick="toggleWebhookSettings()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          ⚙️ 自動送信URL設定
+        </button>
+      </div>
+
+      <!-- 生徒情報入力バー -->
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 mb-3">
+        <div>
+          <label class="text-[11px] font-bold text-slate-500 block mb-1">生徒ID（例: 21015）</label>
+          <input type="text" id="student-id" placeholder="21015" oninput="saveStudentInfo()" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-500 block mb-1">氏名</label>
+          <input type="text" id="student-name" placeholder="山田 太郎" oninput="saveStudentInfo()" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+      </div>
+
+      <!-- 先生用：Google Apps Script / フォーム自動送信設定（折りたたみ） -->
+      <div id="webhook-settings-panel" class="hidden mb-3 p-3.5 rounded-xl bg-sky-50/70 border border-sky-200 animate-pop">
+        <p class="text-xs font-bold text-sky-900 mb-1">🔗 スプレッドシート直接送信（Google Apps Script WebアプリURL）</p>
+        <p class="text-[11px] text-slate-600 mb-2 leading-relaxed">
+          スプレッドシートの「拡張機能 ＞ Apps Script」で公開したウェブアプリURLを貼り付けると、生徒の画面から直接シートに行を追加できます。
+        </p>
+        <div class="flex gap-2">
+          <input type="url" id="webhook-url-input" placeholder="https://script.google.com/macros/s/..." oninput="saveStudentInfo()" class="flex-1 bg-white border border-sky-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          <button type="button" onclick="sendDataToSpreadsheetWebhook()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white hover:bg-sky-700 transition shrink-0">
+            🚀 シートへ送信
+          </button>
+        </div>
+      </div>
+
+      <!-- スプレッドシート転記・出力ボタン群 -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" onclick="copySpreadsheetRowSummary(true)" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm active:scale-95 transition">
+          <span>📋</span>
+          <span>見出し＋成績1行をコピー（シート新規作成用）</span>
+        </button>
+        <button type="button" onclick="copySpreadsheetRowSummary(false)" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-600 text-white hover:bg-sky-700 shadow-sm active:scale-95 transition">
+          <span>➕</span>
+          <span>成績データ1行だけコピー（2行目以降追記用）</span>
+        </button>
+        <button type="button" onclick="copyDetailedQuestionRows()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 active:scale-95 transition">
+          <span>📑</span>
+          <span>全90問の詳細明細をコピー</span>
+        </button>
+        <button type="button" onclick="downloadCsvReport()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 active:scale-95 transition">
+          <span>📥</span>
+          <span>CSV保存</span>
+        </button>
+      </div>
+      <div id="export-status-banner" class="hidden mt-2.5 px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200"></div>
+    </div>
+
+    <!-- 全体サマリーカード（4指標） -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+      <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm text-center">
+        <span class="text-[11px] font-bold text-slate-500 block">全体習得率</span>
+        <div class="text-xl sm:text-2xl font-bold text-sky-600 mt-0.5"><span id="analysis-mastery-rate">0</span><span class="text-xs ml-0.5">%</span></div>
+        <span class="text-[10px] text-slate-500"><span id="analysis-cleared-count">0</span> / 90問 クリア</span>
+      </div>
+      <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm text-center">
+        <span class="text-[11px] font-bold text-slate-500 block">獲得スター</span>
+        <div class="text-xl sm:text-2xl font-bold text-amber-500 mt-0.5">★ <span id="analysis-total-stars" class="text-amber-600">0</span></div>
+        <span class="text-[10px] text-slate-500">満点 270個中</span>
+      </div>
+      <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm text-center">
+        <span class="text-[11px] font-bold text-slate-500 block">ノーミス一発率</span>
+        <div class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5"><span id="analysis-perfect-rate">0</span><span class="text-xs ml-0.5">%</span></div>
+        <span class="text-[10px] text-slate-500">★★★ <span id="analysis-perfect-count">0</span>問</span>
+      </div>
+      <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm text-center">
+        <span class="text-[11px] font-bold text-slate-500 block">累計ミス回数</span>
+        <div class="text-xl sm:text-2xl font-bold text-rose-600 mt-0.5"><span id="analysis-total-mistakes">0</span><span class="text-xs ml-0.5">回</span></div>
+        <span class="text-[10px] text-slate-500">ヒント使用 <span id="analysis-total-hints">0</span>回</span>
+      </div>
+    </div>
+
+    <!-- 単元別（Unit別）成績分析テーブル -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm overflow-hidden">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm sm:text-base font-bold text-slate-800">📈 単元（Unit）別の習得・正答分析表</h3>
+        <span class="text-[11px] text-slate-500">横スクロール可</span>
+      </div>
+      <div class="overflow-x-auto -mx-2 px-2">
+        <table class="w-full text-left border-collapse min-w-[540px]">
+          <thead>
+            <tr class="border-b-2 border-slate-200 text-[11px] font-bold text-slate-500 bg-slate-50">
+              <th class="py-2.5 px-3 rounded-tl-lg">単元</th>
+              <th class="py-2.5 px-3">主な文法テーマ</th>
+              <th class="py-2.5 px-3 text-center">クリア数</th>
+              <th class="py-2.5 px-3">習得率</th>
+              <th class="py-2.5 px-3 text-center">獲得スター</th>
+              <th class="py-2.5 px-3 text-center">ミス数</th>
+              <th class="py-2.5 px-3 rounded-tr-lg text-center">判定</th>
+            </tr>
+          </thead>
+          <tbody id="analysis-unit-tbody" class="divide-y divide-slate-100 text-xs sm:text-sm">
+            <!-- JSで単元別行を生成 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 重点復習ピックアップ（ミスが多い問題・星1〜2の問題） -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-8">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-800">🎯 重点復習ピックアップ（ミスあり・星1〜2の問題）</h3>
+          <p class="text-xs text-slate-500 mt-0.5">間違えた回数が多い問題やヒントを使った問題を優先表示しています。</p>
+        </div>
+      </div>
+      <div id="analysis-weak-list" class="flex flex-col gap-2">
+        <!-- JSで苦手問題リストを生成 -->
+      </div>
+    </div>
+  </section>
+
   <script>
-    // 中2教科書（Unit 0 〜 Unit 7・Let's Read 1〜2）全90問マスターデータ
-    const QUESTIONS = [
+    // 中2教科書（Unit 0 〜 Unit 7・Let's Read 1〜2）全90問マスターデータ（初期内蔵版）
+    const DEFAULT_QUESTIONS = [
       { id: 1, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "be動詞・same", jp: "私たちは同じクラスです！", jpParts: ["私たちは", "同じクラス", "です！"], en: "We are in the same class!", beginner: ["We", "are", "in the same class!"], idxMap: [0, 2, 1], intermediate: ["We", "are", "in", "the", "same", "class!"], advanced: ["We", "are", "in", "the", "same", "class!"], dummies: ["is", "am", "at", "on"], note: "「〜に所属している（同じクラスだ）」は in the same class で表します。" },
       { id: 2, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "過去形・with 人", jp: "私は家族といっしょに札幌に行きました。", jpParts: ["私は", "家族といっしょに", "札幌に", "行きました。"], en: "I went to Sapporo with my family.", beginner: ["I", "went", "to Sapporo", "with my family."], idxMap: [0, 3, 2, 1], intermediate: ["I", "went", "to", "Sapporo", "with", "my", "family."], advanced: ["I", "went", "to", "Sapporo", "with", "my", "family."], dummies: ["go", "goes", "at", "by"], note: "「誰が（I）＋ どうした（went）＋ どこへ（to Sapporo）＋ 誰と（with my family）」の基本語順です。" },
       { id: 3, unitMajor: "Unit 0", unitGroup: "Unit 0", unitLabel: "Unit 0 (p.6)", topic: "動詞＋動名詞（enjoy 〜ing）", jp: "私は弟とスキーをして楽しみました。", jpParts: ["私は", "弟と", "スキーをして", "楽しみました。"], en: "I enjoyed skiing with my brother.", beginner: ["I", "enjoyed", "skiing", "with my brother."], idxMap: [0, 3, 2, 1], intermediate: ["I", "enjoyed", "skiing", "with", "my", "brother."], advanced: ["I", "enjoyed", "skiing", "with", "my", "brother."], dummies: ["enjoy", "to ski", "ski", "by"], note: "enjoy の後ろは to不定詞ではなく動名詞（skiing）を置きます。" },
@@ -601,6 +742,10 @@
       { id: 89, unitMajor: "Unit 7", unitGroup: "Unit 7 Read & Think", unitLabel: "Unit 7 Read & Think 1 (p.92)", topic: "受動態・熟語（be covered with 〜）", jp: "その建物は白い大理石でおおわれています。", jpParts: ["その建物は", "白い大理石で", "おおわれています。"], en: "The building is covered with white marble.", beginner: ["The building", "is covered with", "white marble."], idxMap: [0, 2, 1], intermediate: ["The", "building", "is", "covered", "with", "white", "marble."], advanced: ["The", "building", "is", "covered", "with", "white", "marble."], dummies: ["are", "cover", "by", "in"], note: "be covered with 〜（〜でおおわれている）は前置詞 with を使うのがポイントです。" },
       { id: 90, unitMajor: "Unit 7", unitGroup: "Unit 7 Read & Think", unitLabel: "Unit 7 Read & Think 2 (p.94)", topic: "助動詞＋受動態（will be ＋ 過去分詞）", jp: "私は富士山が永遠に人々に楽しんでもらえることを願っています。", jpParts: ["私は", "富士山が", "永遠に", "人々に", "楽しんでもらえることを", "願っています。"], en: "I hope Mt. Fuji will be enjoyed by people forever.", beginner: ["I", "hope", "Mt. Fuji", "will be enjoyed", "by people", "forever."], idxMap: [0, 5, 1, 4, 3, 2], intermediate: ["I", "hope", "Mt. Fuji", "will", "be", "enjoyed", "by", "people", "forever."], advanced: ["I", "hope", "Mt.", "Fuji", "will", "be", "enjoyed", "by", "people", "forever."], dummies: ["hopes", "enjoy", "enjoying", "for"], note: "「will be ＋ 過去分詞（enjoyed）」で「（これから）〜されるだろう」を表します。" }
     ];
+
+    // 実際にアプリが参照する可変問題配列（スプレッドシート読込時に差し替え可能）
+    let QUESTIONS = [...DEFAULT_QUESTIONS];
+    let isUsingCustomSheet = false;
 
     // 各問題の「語順の型（公式）」データ
     const GRAMMAR_FORMULAS = {
@@ -698,7 +843,7 @@
 
     // アプリケーション状態管理
     let state = {
-      mainTab: 'cover', // 'cover' | 'practice' | 'grammar'
+      mainTab: 'cover', // 'cover' | 'practice' | 'grammar' | 'analysis'
       grammarFilter: 'ALL',
       unitFilter: 'ALL',
       onlyLearned: true,
@@ -714,77 +859,156 @@
       mistakeCount: 0,
       bestScores: {},     // { [questionId]: number (0〜100) }
       bestStars: {},      // { [questionId]: number (1〜3) }
+      questionStats: {},  // { [questionId]: { attempts, mistakes, hints, clearedLevel, lastUpdated } }
+      studentInfo: { studentId: '', name: '', webhookUrl: 'https://script.google.com/macros/s/AKfycbyCC1Sm4hDoJum3ggJHOjL_5v40J9heOLWWc7RwuS3WzN72qVVozV2AQjOb7KxSYEWj/exec' },
       lastEarnedScore: 0,
       lastEarnedStars: 0,
       isSolved: false,
       customCharUrl: null // ユーザーがアップロードした画像URL
     };
 
+    // 保存済み生徒情報の読み込み
+    function loadSavedStudentInfo() {
+      const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyCC1Sm4hDoJum3ggJHOjL_5v40J9heOLWWc7RwuS3WzN72qVVozV2AQjOb7KxSYEWj/exec';
+      try {
+        const raw = localStorage.getItem('eng_g2_student_info');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.studentInfo = { ...state.studentInfo, ...parsed };
+        }
+      } catch (e) {}
+      if (!state.studentInfo.webhookUrl) {
+        state.studentInfo.webhookUrl = DEFAULT_WEBHOOK_URL;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const paramUrl = params.get('webhook');
+      if (paramUrl) state.studentInfo.webhookUrl = paramUrl.trim();
+
+      const cId = document.getElementById('cover-student-id');
+      const cName = document.getElementById('cover-student-name');
+      const aId = document.getElementById('student-id');
+      const aName = document.getElementById('student-name');
+      const wInput = document.getElementById('webhook-url-input');
+
+      if (cId) cId.value = state.studentInfo.studentId || '';
+      if (cName) cName.value = state.studentInfo.name || '';
+      if (aId) aId.value = state.studentInfo.studentId || '';
+      if (aName) aName.value = state.studentInfo.name || '';
+      if (wInput) wInput.value = state.studentInfo.webhookUrl || '';
+
+      updateAutoSyncBadge();
+    }
+
+    // 表紙の生徒入力欄から成績分析タブへ同期
+    function syncStudentInputsFromCover() {
+      const cId = document.getElementById('cover-student-id');
+      const cName = document.getElementById('cover-student-name');
+
+      state.studentInfo.studentId = cId ? cId.value.trim() : '';
+      state.studentInfo.name = cName ? cName.value.trim() : '';
+
+      const aId = document.getElementById('student-id');
+      const aName = document.getElementById('student-name');
+      if (aId) aId.value = state.studentInfo.studentId;
+      if (aName) aName.value = state.studentInfo.name;
+
+      persistStudentInfo();
+    }
+
+    // 成績分析タブの生徒入力欄・URL設定の保存と表紙への同期
+    function saveStudentInfo() {
+      const aId = document.getElementById('student-id');
+      const aName = document.getElementById('student-name');
+      const wInput = document.getElementById('webhook-url-input');
+
+      if (aId) state.studentInfo.studentId = aId.value.trim();
+      if (aName) state.studentInfo.name = aName.value.trim();
+      if (wInput) state.studentInfo.webhookUrl = wInput.value.trim();
+
+      const cId = document.getElementById('cover-student-id');
+      const cName = document.getElementById('cover-student-name');
+      if (cId) cId.value = state.studentInfo.studentId;
+      if (cName) cName.value = state.studentInfo.name;
+
+      persistStudentInfo();
+    }
+
+    function persistStudentInfo() {
+      try {
+        localStorage.setItem('eng_g2_student_info', JSON.stringify(state.studentInfo));
+      } catch (e) {}
+      updateAutoSyncBadge();
+    }
+
+    function updateAutoSyncBadge(statusOverride = null) {
+      const badge = document.getElementById('auto-sync-badge');
+      if (!badge) return;
+      if (statusOverride === 'sending') {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+        badge.textContent = '🔄 送信中...';
+        return;
+      }
+      if (statusOverride === 'sent') {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+        badge.textContent = '✅ 自動記録済み';
+        return;
+      }
+      if (state.studentInfo.webhookUrl) {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        badge.textContent = '🟢 自動送信ON（操作不要）';
+      } else {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200';
+        badge.textContent = '⚪ URL未設定';
+      }
+    }
+
     // ナビゲーターキャラクターのSVG（青いカーディガン・星型ヘアピン・指示棒・青い教科書）
     function getNavigatorSvg(isAvatar = false) {
       const viewBox = isAvatar ? "22 10 156 145" : "0 0 200 220";
       return `
         <svg viewBox="${viewBox}" class="w-full h-full object-contain" xmlns="http://www.w3.org/2000/svg">
-          <!-- 後ろ髪 -->
           <path d="M52 76 C44 105, 48 134, 62 142 C72 146, 128 146, 138 142 C152 134, 156 105, 148 76 Z" fill="#4e3d38" stroke="#2d2226" stroke-width="3" stroke-linejoin="round"/>
-          <!-- 首 -->
           <rect x="92" y="122" width="16" height="16" rx="4" fill="#ffe6d8" stroke="#2d2226" stroke-width="2.5"/>
-          <!-- 制服スカート -->
           <path d="M68 184 L132 184 L142 214 L58 214 Z" fill="#1e3a5f" stroke="#2d2226" stroke-width="3" stroke-linejoin="round"/>
           <path d="M74 184 L68 214 M90 184 L88 214 M110 184 L112 214 M126 184 L132 214" stroke="#3b82f6" stroke-width="2.5"/>
           <path d="M62 198 L138 198 M60 207 L140 207" stroke="#3b82f6" stroke-width="2"/>
-          <!-- インナーのダークネイビーベスト -->
           <path d="M72 136 L128 136 L133 188 L67 188 Z" fill="#2c3545" stroke="#2d2226" stroke-width="3" stroke-linejoin="round"/>
-          <!-- 白シャツ襟 -->
           <path d="M84 134 L100 148 L116 134 L108 130 L100 138 L92 130 Z" fill="#ffffff" stroke="#2d2226" stroke-width="2.5" stroke-linejoin="round"/>
-          <!-- リボンタイ -->
           <path d="M100 145 L84 139 L81 153 L97 149 Z" fill="#1e40af" stroke="#2d2226" stroke-width="2.2" stroke-linejoin="round"/>
           <path d="M100 145 L116 139 L119 153 L103 149 Z" fill="#1e40af" stroke="#2d2226" stroke-width="2.2" stroke-linejoin="round"/>
           <path d="M96 149 L89 167 L98 164 L100 151 Z" fill="#1e3a8a" stroke="#2d2226" stroke-width="2" stroke-linejoin="round"/>
           <path d="M104 149 L111 167 L102 164 L100 151 Z" fill="#1e3a8a" stroke="#2d2226" stroke-width="2" stroke-linejoin="round"/>
           <rect x="95" y="141" width="10" height="9" rx="3" fill="#2563eb" stroke="#2d2226" stroke-width="2.2"/>
-          <!-- 青いカーディガン -->
           <path d="M74 134 C58 138, 48 156, 42 178 L58 182 L72 154 L70 192 L88 192 L90 142 Z" fill="#2b8ac6" stroke="#2d2226" stroke-width="3" stroke-linejoin="round"/>
           <path d="M126 134 C142 138, 152 156, 158 178 L142 182 L128 154 L130 192 L112 192 L110 142 Z" fill="#2b8ac6" stroke="#2d2226" stroke-width="3" stroke-linejoin="round"/>
-          <!-- 指示棒（右手） -->
           <line x1="42" y1="142" x2="22" y2="74" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
           <line x1="42" y1="142" x2="36" y2="122" stroke="#78350f" stroke-width="5.5" stroke-linecap="round"/>
           <polygon points="22,74 18,64 26,66" fill="#94a3b8" stroke="#2d2226" stroke-width="1.8" stroke-linejoin="round"/>
-          <!-- 右手 -->
           <circle cx="42" cy="134" r="7.5" fill="#ffe6d8" stroke="#2d2226" stroke-width="2.5"/>
-          <!-- 左手と青い教科書 -->
           <g transform="rotate(-10 124 166)">
             <rect x="104" y="148" width="32" height="40" rx="4" fill="#3898d4" stroke="#2d2226" stroke-width="2.8"/>
             <rect x="107" y="151" width="5" height="34" fill="#1d6fa5"/>
             <line x1="112" y1="148" x2="134" y2="148" stroke="#ffffff" stroke-width="3"/>
           </g>
           <circle cx="112" cy="172" r="7.5" fill="#ffe6d8" stroke="#2d2226" stroke-width="2.5"/>
-          <!-- 顔の輪郭 -->
           <path d="M58 78 C58 46, 142 46, 142 78 C142 108, 124 126, 100 126 C76 126, 58 108, 58 78 Z" fill="#ffe6d8" stroke="#2d2226" stroke-width="3"/>
-          <!-- チーク -->
           <ellipse cx="73" cy="102" rx="7" ry="4" fill="#fda4af" opacity="0.65"/>
           <ellipse cx="127" cy="102" rx="7" ry="4" fill="#fda4af" opacity="0.65"/>
-          <!-- 大きな青い瞳（左） -->
           <ellipse cx="81" cy="89" rx="9" ry="10.5" fill="#1e3a8a" stroke="#2d2226" stroke-width="2"/>
           <ellipse cx="81" cy="91" rx="6.5" ry="7" fill="#3b82f6"/>
           <circle cx="81" cy="89" r="3.5" fill="#172554"/>
           <circle cx="77.5" cy="84.5" r="3" fill="#ffffff"/>
           <circle cx="84.5" cy="93.5" r="1.5" fill="#ffffff"/>
-          <!-- 大きな青い瞳（右） -->
           <ellipse cx="119" cy="89" rx="9" ry="10.5" fill="#1e3a8a" stroke="#2d2226" stroke-width="2"/>
           <ellipse cx="119" cy="91" rx="6.5" ry="7" fill="#3b82f6"/>
           <circle cx="119" cy="89" r="3.5" fill="#172554"/>
           <circle cx="115.5" cy="84.5" r="3" fill="#ffffff"/>
           <circle cx="122.5" cy="93.5" r="1.5" fill="#ffffff"/>
-          <!-- 眉毛と笑顔の口 -->
           <path d="M73 74 Q81 71 88 74" fill="none" stroke="#3f2e2b" stroke-width="2.2" stroke-linecap="round"/>
           <path d="M112 74 Q119 71 127 74" fill="none" stroke="#3f2e2b" stroke-width="2.2" stroke-linecap="round"/>
           <path d="M94 108 Q100 114 106 108" fill="none" stroke="#2d2226" stroke-width="2.5" stroke-linecap="round"/>
-          <!-- 前髪・サイド髪 -->
           <path d="M50 84 C48 44, 76 26, 100 26 C124 26, 152 44, 150 84 C146 72, 138 64, 133 58 C132 69, 126 76, 121 79 C119 67, 113 58, 108 54 C105 67, 99 75, 93 78 C91 66, 86 58, 82 54 C77 66, 70 74, 65 78 C60 72, 54 76, 50 84 Z" fill="#5c4742" stroke="#2d2226" stroke-width="3" stroke-linejoin="round"/>
-          <!-- 髪のハイライト -->
           <path d="M72 48 Q84 44 92 48 M108 48 Q118 44 128 48" fill="none" stroke="#8c726c" stroke-width="2.5" stroke-linecap="round"/>
-          <!-- 黄色い星型ヘアピン -->
           <g transform="translate(124, 52) rotate(15)">
             <rect x="2" y="-3" width="16" height="6" rx="3" fill="#3b82f6" stroke="#2d2226" stroke-width="2"/>
             <polygon points="0,-10 3,-3 10,-3 4,2 6,9 0,5 -6,9 -4,2 -10,-3 -3,-3" fill="#facc15" stroke="#2d2226" stroke-width="2" stroke-linejoin="round"/>
@@ -895,62 +1119,76 @@
     function updateScoreDisplays() {
       const starsList = Object.values(state.bestStars);
       const totalStars = starsList.reduce((sum, s) => sum + s, 0);
-      const maxStars = QUESTIONS.length * 3;
       const clearedCount = starsList.length;
       const perfectCount = starsList.filter(s => s === 3).length;
-      const masteryRate = Math.round((clearedCount / QUESTIONS.length) * 100);
+      const maxStars = QUESTIONS.length * 3;
+      const masteryRate = QUESTIONS.length > 0 ? Math.round((clearedCount / QUESTIONS.length) * 100) : 0;
 
       const headerStars = document.getElementById('header-total-stars');
+      const headerMaxStars = document.getElementById('header-max-stars');
       if (headerStars) headerStars.textContent = totalStars;
+      if (headerMaxStars) headerMaxStars.textContent = maxStars;
 
       const coverRate = document.getElementById('cover-mastery-rate');
       const coverBar = document.getElementById('cover-mastery-bar');
       const coverCleared = document.getElementById('cover-cleared-count');
+      const coverTotalQ = document.getElementById('cover-total-questions');
       const coverTotalStars = document.getElementById('cover-total-stars');
+      const coverMaxStars = document.getElementById('cover-max-stars');
       const coverPerfect = document.getElementById('cover-perfect-count');
 
       if (coverRate) coverRate.textContent = masteryRate;
       if (coverBar) coverBar.style.width = `${masteryRate}%`;
       if (coverCleared) coverCleared.textContent = clearedCount;
+      if (coverTotalQ) coverTotalQ.textContent = QUESTIONS.length;
       if (coverTotalStars) coverTotalStars.textContent = totalStars;
+      if (coverMaxStars) coverMaxStars.textContent = maxStars;
       if (coverPerfect) coverPerfect.textContent = perfectCount;
     }
 
-    // メインタブ切り替え（表紙 / 英作文練習 / 単元選択・文法チェック）
+    // メインタブ切り替え（表紙 / 英作文練習 / 単元選択・文法 / 成績分析）
     function switchMainTab(tab) {
       state.mainTab = tab;
       const coverView = document.getElementById('view-cover');
       const practiceView = document.getElementById('view-practice');
       const grammarView = document.getElementById('view-grammar');
+      const analysisView = document.getElementById('view-analysis');
 
       const tabCover = document.getElementById('tab-cover');
       const tabPractice = document.getElementById('tab-practice');
       const tabGrammar = document.getElementById('tab-grammar');
+      const tabAnalysis = document.getElementById('tab-analysis');
 
-      const activeBtnClass = 'px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-sky-700 shadow-sm';
-      const inactiveBtnClass = 'px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900';
+      const activeBtnClass = 'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-sky-700 shadow-sm';
+      const inactiveBtnClass = 'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900';
 
-      coverView.classList.add('hidden');
-      practiceView.classList.add('hidden');
-      grammarView.classList.add('hidden');
+      if (coverView) coverView.classList.add('hidden');
+      if (practiceView) practiceView.classList.add('hidden');
+      if (grammarView) grammarView.classList.add('hidden');
+      if (analysisView) analysisView.classList.add('hidden');
 
-      tabCover.className = inactiveBtnClass;
-      tabPractice.className = inactiveBtnClass;
-      tabGrammar.className = inactiveBtnClass;
+      if (tabCover) tabCover.className = inactiveBtnClass;
+      if (tabPractice) tabPractice.className = inactiveBtnClass;
+      if (tabGrammar) tabGrammar.className = inactiveBtnClass;
+      if (tabAnalysis) tabAnalysis.className = inactiveBtnClass;
 
       if (tab === 'cover') {
-        coverView.classList.remove('hidden');
-        tabCover.className = activeBtnClass;
+        if (coverView) coverView.classList.remove('hidden');
+        if (tabCover) tabCover.className = activeBtnClass;
         updateLearnedBadge();
         updateScoreDisplays();
       } else if (tab === 'practice') {
-        practiceView.classList.remove('hidden');
-        tabPractice.className = activeBtnClass;
+        if (practiceView) practiceView.classList.remove('hidden');
+        if (tabPractice) tabPractice.className = activeBtnClass;
         syncPracticeAfterFilterChange();
-      } else {
-        grammarView.classList.remove('hidden');
-        tabGrammar.className = activeBtnClass;
+      } else if (tab === 'grammar') {
+        if (grammarView) grammarView.classList.remove('hidden');
+        if (tabGrammar) tabGrammar.className = activeBtnClass;
         renderGrammarList();
+      } else if (tab === 'analysis') {
+        if (analysisView) analysisView.classList.remove('hidden');
+        if (tabAnalysis) tabAnalysis.className = activeBtnClass;
+        renderAnalysisView();
       }
     }
 
@@ -1027,7 +1265,7 @@
       } else if (preset === 'U4_U5') {
         QUESTIONS.filter(q => q.unitMajor === 'Unit 4' || q.unitMajor === 'Unit 5').forEach(q => state.learnedIds.add(q.id));
       } else if (preset === 'U6_U7') {
-        QUESTIONS.filter(q => q.id >= 69).forEach(q => state.learnedIds.add(q.id));
+        QUESTIONS.filter(q => q.unitMajor === 'Unit 6' || q.unitMajor === "Let's Read 2" || q.unitMajor === 'Unit 7').forEach(q => state.learnedIds.add(q.id));
       } else if (preset === 'ALL') {
         QUESTIONS.forEach(q => state.learnedIds.add(q.id));
       }
@@ -1039,16 +1277,16 @@
         U3_LR1: '「Unit 3〜Let\'s Read 1 まで（46問）」を出題ONにしました',
         U4_U5: '「Unit 4〜5 のみ（22問）」を出題ONにしました',
         U6_U7: '「Unit 6〜7・Let\'s Read 2（22問）」を出題ONにしました',
-        ALL: '「全90問」を出題ONにしました',
+        ALL: `「全${QUESTIONS.length}問」を出題ONにしました`,
         NONE: 'すべての問題を出題OFFにしました'
       };
-      showToast(msgMap[preset], 'info');
+      showToast(msgMap[preset] || '出題範囲を更新しました', 'info');
     }
 
     // インライン文法ガイドの開閉
     function toggleInlineGrammarGuide() {
       const panel = document.getElementById('inline-grammar-panel');
-      panel.classList.toggle('hidden');
+      if (panel) panel.classList.toggle('hidden');
     }
 
     // 文法チェック一覧のフィルタ切り替え
@@ -1067,6 +1305,7 @@
     // 単元選択＆文法チェック一覧の描画
     function renderGrammarList() {
       const container = document.getElementById('grammar-cards-list');
+      if (!container) return;
       const filtered = state.grammarFilter === 'ALL'
         ? QUESTIONS
         : QUESTIONS.filter(q => q.unitMajor === state.grammarFilter);
@@ -1115,14 +1354,15 @@
       }).join('');
     }
 
-    // 文法一覧から特定の問題へ直接移動して解く
+    // 文法一覧・成績分析から特定の問題へ直接移動して解く
     function jumpToQuestionFromGrammar(id) {
       if (!state.learnedIds.has(id)) {
         state.learnedIds.add(id);
         updateLearnedBadge();
       }
       state.unitFilter = 'ALL';
-      document.getElementById('unit-filter').value = 'ALL';
+      const uFilter = document.getElementById('unit-filter');
+      if (uFilter) uFilter.value = 'ALL';
       switchMainTab('practice');
       loadQuestion(id);
     }
@@ -1152,6 +1392,7 @@
     // 問題セレクトボックスの描画
     function renderQuestionSelector() {
       const select = document.getElementById('question-select');
+      if (!select) return;
       const filtered = getFilteredQuestions();
 
       if (filtered.length === 0) {
@@ -1189,7 +1430,8 @@
         intermediate: '中級：接続詞や前置詞も自力で判断しよう（ノーヒント挑戦）',
         advanced: '上級：1単語ずつ＋ダミー選択肢あり！正確な語法を見抜こう（ノーヒント挑戦）'
       };
-      document.getElementById('level-desc').textContent = descMap[newLevel];
+      const descEl = document.getElementById('level-desc');
+      if (descEl) descEl.textContent = descMap[newLevel];
 
       const hintBtn = document.getElementById('btn-hint');
       const guideBtn = document.getElementById('btn-grammar-guide');
@@ -1413,6 +1655,16 @@
         state.bestScores[q.id] = Math.max(prevBestScore, earnedScore);
         state.bestStars[q.id] = Math.max(prevBestStars, earnedStars);
 
+        // 成績分析用の統計データを更新
+        const prevStat = state.questionStats[q.id] || { attempts: 0, mistakes: 0, hints: 0, clearedLevel: '' };
+        state.questionStats[q.id] = {
+          attempts: prevStat.attempts + 1,
+          mistakes: prevStat.mistakes + state.mistakeCount,
+          hints: prevStat.hints + state.hintUsedCount,
+          clearedLevel: state.level,
+          lastUpdated: new Date().toLocaleString('ja-JP')
+        };
+
         if (earnedStars === 3) {
           setCharSpeech('すごい！ノーヒント＆ノーミスで★★★（星3つ）達成だよ！');
         } else {
@@ -1422,6 +1674,7 @@
         updateScoreDisplays();
         renderAll();
         speakAnswer();
+        autoSyncProgressToSpreadsheet();
       } else {
         setCharSpeech(`いい調子！あと ${targetTokens.length - state.selectedTokens.length} パーツだよ！`);
         renderAll();
@@ -1455,6 +1708,13 @@
     let toastTimer = null;
     function triggerErrorFeedback(wrongWord) {
       state.mistakeCount += 1;
+      const q = getCurrentQuestion();
+      const prevStat = state.questionStats[q.id] || { attempts: 0, mistakes: 0, hints: 0, clearedLevel: '' };
+      state.questionStats[q.id] = {
+        ...prevStat,
+        mistakes: prevStat.mistakes + 1
+      };
+
       setCharSpeech(`おっと、「${wrongWord}」はまだ先みたい！もういちど語順を考えてみよう！`);
       renderAll();
 
@@ -1469,6 +1729,7 @@
     // トースト表示
     function showToast(message, type = 'error') {
       const toast = document.getElementById('feedback-toast');
+      if (!toast) return;
       toast.textContent = message;
       toast.className = type === 'error'
         ? 'rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-center bg-rose-100 text-rose-800 border border-rose-200 animate-pop'
@@ -1546,8 +1807,315 @@
       window.speechSynthesis.speak(utter);
     }
 
+    // ============================================================
+    // 成績分析＆スプレッドシート集計機能
+    // ============================================================
+
+    const UNIT_META_G2 = [
+      { key: 'Unit 0', theme: 'be動詞・過去形・enjoy 〜ing' },
+      { key: 'Unit 1', theme: '未来（be going to / will）・SVOO / SVOC' },
+      { key: 'Unit 2', theme: '接続詞（when / if / because / that）' },
+      { key: 'Unit 3', theme: '不定詞（名詞・形容詞・副詞的用法）' },
+      { key: "Let's Read 1", theme: '接続詞・不定詞の総合読解' },
+      { key: 'Unit 4', theme: '助動詞（have to / must）・動名詞' },
+      { key: 'Unit 5', theme: '疑問詞＋to不定詞・接続詞 that' },
+      { key: 'Unit 6', theme: '比較級・最上級・as 〜 as' },
+      { key: "Let's Read 2", theme: '助動詞・熟語の物語読解' },
+      { key: 'Unit 7', theme: '受動態（be動詞＋過去分詞）' }
+    ];
+
+    // 成績集計データを計算
+    function computeAnalyticsData() {
+      const starsList = Object.values(state.bestStars);
+      const clearedCount = starsList.length;
+      const totalStars = starsList.reduce((sum, s) => sum + s, 0);
+      const perfectCount = starsList.filter(s => s === 3).length;
+      const masteryRate = QUESTIONS.length > 0 ? Math.round((clearedCount / QUESTIONS.length) * 100) : 0;
+      const perfectRate = clearedCount > 0 ? Math.round((perfectCount / clearedCount) * 100) : 0;
+
+      let totalMistakes = 0;
+      let totalHints = 0;
+      Object.values(state.questionStats).forEach(st => {
+        totalMistakes += st.mistakes || 0;
+        totalHints += st.hints || 0;
+      });
+
+      const units = UNIT_META_G2.map(u => {
+        const qs = QUESTIONS.filter(q => q.unitMajor === u.key);
+        const total = qs.length;
+        let cleared = 0;
+        let stars = 0;
+        let mistakes = 0;
+        qs.forEach(q => {
+          if (state.bestStars[q.id]) {
+            cleared += 1;
+            stars += state.bestStars[q.id];
+          }
+          if (state.questionStats[q.id]) {
+            mistakes += state.questionStats[q.id].mistakes || 0;
+          }
+        });
+        const rate = total > 0 ? Math.round((cleared / total) * 100) : 0;
+        return {
+          key: u.key,
+          theme: u.theme,
+          total,
+          cleared,
+          rate,
+          stars,
+          maxStars: total * 3,
+          mistakes
+        };
+      });
+
+      return {
+        timestamp: new Date().toLocaleString('ja-JP'),
+        grade: '中2',
+        studentId: state.studentInfo.studentId || '未入力',
+        name: state.studentInfo.name || '未入力',
+        clearedCount,
+        masteryRate,
+        totalStars,
+        perfectCount,
+        perfectRate,
+        totalMistakes,
+        totalHints,
+        units
+      };
+    }
+
+    // 成績分析ビューの描画
+    function renderAnalysisView() {
+      const data = computeAnalyticsData();
+
+      const elRate = document.getElementById('analysis-mastery-rate');
+      const elCleared = document.getElementById('analysis-cleared-count');
+      const elStars = document.getElementById('analysis-total-stars');
+      const elPerfRate = document.getElementById('analysis-perfect-rate');
+      const elPerfCount = document.getElementById('analysis-perfect-count');
+      const elMistakes = document.getElementById('analysis-total-mistakes');
+      const elHints = document.getElementById('analysis-total-hints');
+
+      if (elRate) elRate.textContent = data.masteryRate;
+      if (elCleared) elCleared.textContent = data.clearedCount;
+      if (elStars) elStars.textContent = data.totalStars;
+      if (elPerfRate) elPerfRate.textContent = data.perfectRate;
+      if (elPerfCount) elPerfCount.textContent = data.perfectCount;
+      if (elMistakes) elMistakes.textContent = data.totalMistakes;
+      if (elHints) elHints.textContent = data.totalHints;
+
+      const tbody = document.getElementById('analysis-unit-tbody');
+      if (tbody) {
+        tbody.innerHTML = data.units.map(u => {
+          let judgeBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500">未着手</span>';
+          if (u.cleared > 0) {
+            if (u.rate === 100 && u.mistakes === 0) {
+              judgeBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">◎ 完璧</span>';
+            } else if (u.rate >= 70) {
+              judgeBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-100 text-sky-800">○ 順調</span>';
+            } else {
+              judgeBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">△ 練習中</span>';
+            }
+          }
+
+          return `
+            <tr class="hover:bg-slate-50/80 transition">
+              <td class="py-2.5 px-3 font-bold text-slate-800 whitespace-nowrap">${u.key}</td>
+              <td class="py-2.5 px-3 text-xs text-slate-600">${u.theme}</td>
+              <td class="py-2.5 px-3 text-center font-semibold text-slate-700">${u.cleared} / ${u.total}</td>
+              <td class="py-2.5 px-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-16 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-sky-600 h-full rounded-full" style="width: ${u.rate}%"></div>
+                  </div>
+                  <span class="text-xs font-bold text-slate-700">${u.rate}%</span>
+                </div>
+              </td>
+              <td class="py-2.5 px-3 text-center font-bold text-amber-600">★ ${u.stars}</td>
+              <td class="py-2.5 px-3 text-center font-semibold ${u.mistakes > 0 ? 'text-rose-600' : 'text-slate-400'}">${u.mistakes}回</td>
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">${judgeBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const weakList = document.getElementById('analysis-weak-list');
+      if (weakList) {
+        const weakItems = QUESTIONS.map(q => {
+          const st = state.questionStats[q.id];
+          const star = state.bestStars[q.id] || 0;
+          const mistakes = st ? st.mistakes : 0;
+          const hints = st ? st.hints : 0;
+          return { q, star, mistakes, hints, priority: mistakes * 10 + hints * 5 + (star > 0 && star < 3 ? 3 : 0) };
+        }).filter(item => item.priority > 0)
+          .sort((a, b) => b.priority - a.priority)
+          .slice(0, 10);
+
+        if (weakItems.length === 0) {
+          weakList.innerHTML = `<div class="p-4 rounded-xl bg-slate-50 text-xs text-slate-500 text-center">まだミスやヒント使用の履歴がありません。練習画面で問題を解くとここに苦手分析が表示されます！</div>`;
+        } else {
+          weakList.innerHTML = weakItems.map(item => `
+            <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-slate-200 text-slate-700">Q.${item.q.id}</span>
+                  <span class="text-xs font-bold text-sky-700">${item.q.unitLabel}</span>
+                  <span class="text-xs font-bold text-slate-800">${item.q.topic}</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">${item.q.jp}（ミス ${item.mistakes}回 / ヒント ${item.hints}回）</p>
+              </div>
+              <button type="button" onclick="jumpToQuestionFromGrammar(${item.q.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-600 text-white hover:bg-sky-700 transition">
+                解き直す →
+              </button>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    function toggleWebhookSettings() {
+      const panel = document.getElementById('webhook-settings-panel');
+      if (panel) panel.classList.toggle('hidden');
+    }
+
+    function showExportBanner(msg) {
+      const banner = document.getElementById('export-status-banner');
+      if (!banner) return;
+      banner.textContent = msg;
+      banner.classList.remove('hidden');
+    }
+
+    // クリップボードへテキストをコピーするヘルパー（iframe互換）
+    function copyTextToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {}
+      document.body.removeChild(textarea);
+    }
+
+    // スプレッドシート貼付用：生徒1行サマリーをコピー
+    function copySpreadsheetRowSummary(includeHeader) {
+      const data = computeAnalyticsData();
+      const headers = [
+        '最終更新日時', '学年', '生徒ID', '氏名',
+        'クリア問題数', '全体習得率(%)', '獲得スター', 'ノーミス満点(★★★)数', '累計ミス回数', 'ヒント使用回数',
+        ...data.units.map(u => `${u.key}習得率(%)`),
+        ...data.units.map(u => `${u.key}ミス`)
+      ];
+      const row = [
+        data.timestamp, data.grade, data.studentId, data.name,
+        data.clearedCount, data.masteryRate, data.totalStars, data.perfectCount, data.totalMistakes, data.totalHints,
+        ...data.units.map(u => u.rate),
+        ...data.units.map(u => u.mistakes)
+      ];
+
+      const tsv = includeHeader
+        ? `${headers.join('\t')}\n${row.join('\t')}`
+        : row.join('\t');
+
+      copyTextToClipboard(tsv);
+      showExportBanner(includeHeader
+        ? '✅ 見出し＋成績データ1行をコピーしました！スプレッドシートのA1セルに貼り付けてください。'
+        : '✅ 成績データ1行をコピーしました！スプレッドシートの次の空白行（A列）に貼り付けてください。');
+    }
+
+    // 全90問の詳細明細をコピー
+    function copyDetailedQuestionRows() {
+      const data = computeAnalyticsData();
+      const header = ['生徒ID', '氏名', '問題ID', '単元', '文法テーマ', 'クリア状況', '最高スター', 'ミス回数', 'ヒント回数'].join('\t');
+      const rows = QUESTIONS.map(q => {
+        const star = state.bestStars[q.id] || 0;
+        const st = state.questionStats[q.id] || { mistakes: 0, hints: 0 };
+        return [
+          data.studentId, data.name,
+          q.id, q.unitLabel, q.topic,
+          star > 0 ? 'クリア' : '未クリア',
+          star, st.mistakes || 0, st.hints || 0
+        ].join('\t');
+      });
+
+      copyTextToClipboard(`${header}\n${rows.join('\n')}`);
+      showExportBanner('✅ 全90問の詳細明細（91行）をコピーしました！スプレッドシートにそのまま貼り付けできます。');
+    }
+
+    // CSVダウンロード
+    function downloadCsvReport() {
+      const data = computeAnalyticsData();
+      const headers = [
+        '最終更新日時', '学年', '生徒ID', '氏名',
+        'クリア問題数', '全体習得率(%)', '獲得スター', 'ノーミス満点(★★★)数', '累計ミス回数', 'ヒント使用回数',
+        ...data.units.map(u => `${u.key}習得率(%)`),
+        ...data.units.map(u => `${u.key}ミス`)
+      ];
+      const row = [
+        data.timestamp, data.grade, data.studentId, data.name,
+        data.clearedCount, data.masteryRate, data.totalStars, data.perfectCount, data.totalMistakes, data.totalHints,
+        ...data.units.map(u => u.rate),
+        ...data.units.map(u => u.mistakes)
+      ];
+      const csvContent = '\uFEFF' + [headers, row].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `中2英作文成績_${data.studentId}_${data.name}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showExportBanner('📥 CSVファイルをダウンロードしました！');
+    }
+
+    // バックグラウンド自動送信（1問正解ごとに操作不要で送信）
+    async function autoSyncProgressToSpreadsheet() {
+      const url = state.studentInfo.webhookUrl;
+      if (!url) return;
+
+      const data = computeAnalyticsData();
+      updateAutoSyncBadge('sending');
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(data)
+        });
+        updateAutoSyncBadge('sent');
+      } catch (err) {
+        updateAutoSyncBadge();
+      }
+    }
+
+    // 手動送信ボタン用
+    async function sendDataToSpreadsheetWebhook() {
+      const url = state.studentInfo.webhookUrl;
+      if (!url) {
+        showExportBanner('⚠️ 送信先URLを入力してください。');
+        return;
+      }
+      const data = computeAnalyticsData();
+      showExportBanner('🚀 スプレッドシートへ送信しています...');
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(data)
+        });
+        updateAutoSyncBadge('sent');
+        showExportBanner('✅ スプレッドシートへ成績データを送信しました！');
+      } catch (err) {
+        showExportBanner('⚠️ 送信時にエラーが発生しました。URLをご確認ください。');
+      }
+    }
+
     // 初期起動
     window.onload = () => {
+      loadSavedStudentInfo();
       renderCharacterDisplays();
       updateLearnedBadge();
       updateScoreDisplays();
