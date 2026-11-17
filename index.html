@@ -1,6 +1,7 @@
 
 
 
+
 HTML のアイコン
 textbook_grade2_v5_nosync
 <!DOCTYPE html>
@@ -48,6 +49,10 @@ textbook_grade2_v5_nosync
       <div class="flex items-center gap-2.5">
         <span class="px-2.5 py-1 rounded-lg bg-sky-500 text-white text-xs font-extrabold tracking-wider">中2教科書</span>
         <h1 class="rounded-title text-base sm:text-lg font-extrabold text-slate-800">英作文トレーニング</h1>
+      <div class="flex items-center gap-2 ml-2 sm:ml-4">
+        <div id="student-name-display" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg cursor-pointer border border-slate-200 hover:bg-slate-200 transition" onclick="openNameModal()" title="名前を変更する">未登録</div>
+        <div id="sync-status" class="text-[10px] font-bold text-slate-400 w-16 text-center">☁️ 待機</div>
+      </div>
       </div>
 
       <!-- Navigation Tabs -->
@@ -64,7 +69,60 @@ textbook_grade2_v5_nosync
     </div>
   </header>
 
+  
+  <!-- Name Registration Modal -->
+  <div id="name-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+      <h3 class="text-xl font-extrabold text-slate-800 text-center">学習を始めよう！</h3>
+      <p class="text-sm text-slate-600 text-center">成績を記録するために、<br>生徒ID・名前を入力してください。</p>
+      <div class="flex gap-2">
+        
+        <input type="text" id="student-number-input" placeholder="生徒ID(例:1234)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-sky-500 focus:outline-none font-bold text-slate-800 text-sm" />
+      </div>
+      <input type="text" id="student-name-input" placeholder="名前（例：山田 太郎）" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-sky-500 focus:outline-none font-bold text-slate-800 text-sm" />
+      <button onclick="registerName()" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-base shadow-md transition">
+        登録してスタート
+      </button>
+    </div>
+  </div>
+
+  <!-- Session Result Modal -->
+  <div id="session-result-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-5 transform transition-all text-center">
+      <h3 class="text-2xl font-black text-sky-600">1クール達成！</h3>
+      <p class="text-sm text-slate-600 font-bold">10問のトレーニングが完了しました</p>
+      
+      <div class="bg-sky-50 rounded-2xl p-4 border border-sky-100">
+        <div class="text-xs font-bold text-sky-700 mb-1">今回のスコア (一発正解×10点)</div>
+        <div class="flex items-baseline justify-center gap-1">
+          <span id="session-score" class="text-5xl font-black text-sky-500">100</span>
+          <span class="text-lg font-bold text-sky-700">点</span>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+          <div class="text-[10px] font-bold text-slate-500">一発正解</div>
+          <div id="session-first-try" class="font-black text-slate-700 text-lg">10問</div>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+          <div class="text-[10px] font-bold text-slate-500">総ミス回数</div>
+          <div id="session-mistakes" class="font-black text-rose-500 text-lg">0回</div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-2">
+        <button onclick="startNextSession()" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-sm shadow-md transition">
+          次の10問へ進む
+        </button>
+        <button onclick="returnToCoverFromSession()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+          トップに戻る
+        </button>
+      </div>
+    </div>
+  </div>
   <main class="max-w-5xl mx-auto px-3 sm:px-5 py-5">
+
 
     <!-- ==================== 1. COVER VIEW ==================== -->
     <section id="view-cover" class="space-y-5">
@@ -91,13 +149,17 @@ textbook_grade2_v5_nosync
               教科書英文 並べ替え＆英作文マスター
             </h2>
             <p id="navigator-speech" class="text-sm text-slate-600 bg-sky-50/80 border border-sky-200 rounded-2xl p-3">
-              「こんにちは！毎日コツコツ頑張っていこう！！」
+              「1問クリアするたびに実力がつくよ！毎日コツコツ頑張っていこう！！」
             </p>
           </div>
         </div>
 
         <!-- Overall Stats Cards -->
-        <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="mt-5 grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div class="bg-purple-50 rounded-2xl p-3.5 border border-purple-200 text-center">
+            <div class="text-xs font-bold text-purple-700">本日のクリア数</div>
+            <div id="stat-today-count" class="text-2xl font-black text-purple-900 mt-0.5">0問</div>
+          </div>
           <div class="bg-sky-50 rounded-2xl p-3.5 border border-sky-200 text-center">
             <div class="text-xs font-bold text-sky-700">対象範囲の問題数</div>
             <div id="stat-target-count" class="text-2xl font-black text-sky-900 mt-0.5">285問</div>
@@ -220,7 +282,7 @@ textbook_grade2_v5_nosync
           <div id="feedback-correct-en" class="text-base sm:text-lg font-extrabold text-slate-900 bg-white/80 p-3 rounded-xl border"></div>
           <p id="feedback-memo" class="text-xs sm:text-sm text-slate-700 leading-relaxed"></p>
           <div class="flex justify-end">
-            <button onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow">
+            <button id="feedback-next-btn" onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow">
               次の問題へ進む →
             </button>
           </div>
@@ -337,6 +399,19 @@ textbook_grade2_v5_nosync
 <script>
 const STORAGE_KEY = "compass_eng_g2_v3_progress";
 const SCOPE_STORAGE_KEY = "compass_eng_g2_v3_scope";
+const USERNAME_KEY = "compass_eng_g2_v3_username";
+const CLASS_KEY = "compass_eng_g2_v3_class";
+const NUMBER_KEY = "compass_eng_g2_v3_number";
+const TODAY_DATE_KEY = "compass_eng_g2_v3_today_date";
+const TODAY_COUNT_KEY = "compass_eng_g2_v3_today_count";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyCC1Sm4hDoJum3ggJHOjL_5v40J9heOLWWc7RwuS3WzN72qVVozV2AQjOb7KxSYEWj/exec"; 
+let currentUserName = "";
+let currentClass = "";
+let currentNumber = "";
+let sessionQuestionCount = 0;
+let sessionFirstTryCount = 0;
+let sessionTotalMistakes = 0;
+let sessionMissedIds = [];
 const AVATAR_STORAGE_KEY = "compass_eng_g2_v3_avatar";
 const VARIANT_STORAGE_KEY = "compass_eng_g2_v3_variant_mode";
 
@@ -368,6 +443,16 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadSavedState() {
+  currentUserName = localStorage.getItem(USERNAME_KEY) || "";
+  currentClass = localStorage.getItem(CLASS_KEY) || "";
+  currentNumber = localStorage.getItem(NUMBER_KEY) || "";
+  if (!currentUserName || !currentClass || !currentNumber) {
+    document.getElementById('name-modal').classList.remove('hidden');
+  } else {
+    updateNameDisplay();
+  }
+
+  updateSessionStatus();
   try {
     const p = localStorage.getItem(STORAGE_KEY);
     if (p) progressData = JSON.parse(p);
@@ -408,7 +493,163 @@ function saveScopeState() {
   try { localStorage.setItem(SCOPE_STORAGE_KEY, JSON.stringify([...enabledParts])); } catch (e) {}
 }
 
-)); } catch (e) {}
+function updateSessionStatus() {
+  const remain = 10 - sessionQuestionCount;
+  const statusEl = document.getElementById('sync-status');
+  if (!statusEl) return;
+  
+  if (remain <= 0) {
+    statusEl.innerHTML = '🔄 送信中';
+    statusEl.className = 'text-[10px] font-bold text-sky-500 w-16 text-center';
+  } else {
+    statusEl.innerHTML = `あと${remain}問`;
+    statusEl.className = 'text-[10px] font-bold text-slate-500 w-16 text-center border border-slate-200 rounded bg-white';
+  }
+}
+
+function showSessionResult() {
+  document.getElementById('session-score').textContent = (sessionFirstTryCount * 10);
+  document.getElementById('session-first-try').textContent = sessionFirstTryCount + "問";
+  document.getElementById('session-mistakes').textContent = sessionTotalMistakes + "回";
+  
+  document.getElementById('session-result-modal').classList.remove('hidden');
+  syncDataToGAS();
+}
+
+function startNextSession() {
+  sessionQuestionCount = 0;
+  sessionFirstTryCount = 0;
+  sessionTotalMistakes = 0;
+  sessionMissedIds = [];
+  updateSessionStatus();
+  document.getElementById('session-result-modal').classList.add('hidden');
+  nextQuestion();
+}
+
+function returnToCoverFromSession() {
+  sessionQuestionCount = 0;
+  sessionFirstTryCount = 0;
+  sessionTotalMistakes = 0;
+  sessionMissedIds = [];
+  updateSessionStatus();
+  document.getElementById('session-result-modal').classList.add('hidden');
+  switchMainTab('cover');
+}
+
+function getTodayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function getTodayCount() {
+  const today = getTodayString();
+  let savedDate = localStorage.getItem(TODAY_DATE_KEY);
+  if (savedDate !== today) return 0;
+  return parseInt(localStorage.getItem(TODAY_COUNT_KEY) || "0", 10);
+}
+
+function incrementTodayCount() {
+  const today = getTodayString();
+  let savedDate = localStorage.getItem(TODAY_DATE_KEY);
+  let count = parseInt(localStorage.getItem(TODAY_COUNT_KEY) || "0", 10);
+  
+  if (savedDate !== today) {
+    count = 1;
+    localStorage.setItem(TODAY_DATE_KEY, today);
+  } else {
+    count++;
+  }
+  localStorage.setItem(TODAY_COUNT_KEY, count);
+  updateCoverStats();
+}
+
+function updateNameDisplay() {
+  const disp = document.getElementById('student-name-display');
+  if(disp) disp.textContent = `ID:${currentNumber} ${currentUserName}`;
+}
+
+function registerName() {
+  const num = document.getElementById('student-number-input').value.trim();
+  const name = document.getElementById('student-name-input').value.trim();
+  if (!num || !name) {
+    alert("生徒ID、名前を両方入力してください。");
+    return;
+  }
+  currentNumber = num;
+  currentUserName = name;
+  localStorage.setItem(NUMBER_KEY, num);
+  localStorage.setItem(USERNAME_KEY, name);
+  updateNameDisplay();
+  document.getElementById('name-modal').classList.add('hidden');
+}
+
+function openNameModal() {
+  document.getElementById('student-number-input').value = currentNumber;
+  document.getElementById('student-name-input').value = currentUserName;
+  document.getElementById('name-modal').classList.remove('hidden');
+}
+
+function syncDataToGAS() {
+  if (!currentUserName || !GAS_URL) return;
+
+  const stats = computeAnalyticsData();
+  const now = new Date();
+  const timestamp = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+  const unitKeys = [
+    "Unit 0", "Unit 1", "Unit 2", "Unit 3", "Let's Read 1",
+    "Unit 4", "Unit 5", "Unit 6", "Let's Read 2", "Unit 7"
+  ];
+  
+  const payload = {
+    timestamp: timestamp,
+    grade: '中2',
+    student_number: currentNumber,
+    name: currentUserName,
+    session_score: (sessionFirstTryCount * 10), // 点数スコア
+    missed_questions: sessionMissedIds.join(', '), // 1クールで間違えた問題ID
+    clearedCount: stats.totalCleared,
+    masteryRate: stats.masteryRate,
+    totalStars: stats.totalStars,
+    perfectCount: stats.perfectCount,
+    totalMistakes: stats.totalMistakes,
+    totalHints: stats.totalHints
+  };
+  
+  unitKeys.forEach(k => {
+    const u = stats.units.find(x => x.key === k);
+    payload[`${k}_rate`] = u ? u.rate : 0;
+  });
+
+  unitKeys.forEach(k => {
+    const u = stats.units.find(x => x.key === k);
+    payload[`${k}_mistakes`] = u ? u.mistakes : 0;
+  });
+
+  const statusEl = document.getElementById('sync-status');
+  if (statusEl) {
+    statusEl.innerHTML = '🔄 送信中';
+    statusEl.className = 'text-[10px] font-bold text-sky-500 w-12 text-center';
+  }
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => {
+    if (statusEl) {
+      statusEl.innerHTML = '☁️ 記録済';
+      statusEl.className = 'text-[10px] font-bold text-emerald-500 w-16 text-center';
+    }
+  })
+  .catch(e => {
+    console.error("Sync error", e);
+    if (statusEl) {
+      statusEl.innerHTML = '⚠️ 失敗';
+      statusEl.className = 'text-[10px] font-bold text-rose-500 w-16 text-center';
+    }
+  });
 }
 
 function handleAvatarUpload(e) {
@@ -860,6 +1101,25 @@ function checkAnswer() {
       cleared: true
     };
     saveProgressState();
+    incrementTodayCount();
+    
+    sessionQuestionCount++;
+    if (questionMistakes === 0 && questionHints === 0) {
+      sessionFirstTryCount++;
+    }
+    sessionTotalMistakes += questionMistakes;
+    updateSessionStatus();
+
+    const nextBtn = document.getElementById('feedback-next-btn');
+    if (nextBtn) {
+      if (sessionQuestionCount >= 10) {
+        nextBtn.textContent = '結果を見る 🏆';
+        nextBtn.setAttribute('onclick', 'showSessionResult()');
+      } else {
+        nextBtn.textContent = '次の問題へ進む →';
+        nextBtn.setAttribute('onclick', 'nextQuestion()');
+      }
+    }
 
     fbArea.classList.add('bg-emerald-50', 'border-emerald-300');
     fbTitle.className = 'text-lg font-black text-emerald-800';
@@ -875,6 +1135,9 @@ function checkAnswer() {
     
   } else {
     questionMistakes++;
+    if (!sessionMissedIds.includes(qKey)) {
+      sessionMissedIds.push(qKey);
+    }
     const prev = progressData[qKey] || { stars: 0, mistakes: 0, hints: 0, cleared: false };
     progressData[qKey] = { ...prev, mistakes: prev.mistakes + 1 };
     saveProgressState();
@@ -1034,6 +1297,9 @@ function updateCoverStats() {
   document.getElementById('stat-cleared-count').textContent = `${targetCleared} / ${filteredQuestions.length}`;
   document.getElementById('stat-mastery-rate').textContent = `${stats.masteryRate}%`;
   document.getElementById('stat-stars-count').textContent = `★ ${stats.totalStars} / ${QUESTIONS.length * 3}`;
+
+  const todayEl = document.getElementById('stat-today-count');
+  if(todayEl) todayEl.textContent = getTodayCount() + "問";
 }
 
 function renderAnalytics() {
@@ -1093,31 +1359,6 @@ function practiceMajorUnit(mu) {
   saveScopeState();
   applyFilterAndReset(true);
   switchMainTab('practice');
-}
-
-/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-
-  const payload = {
-    timestamp,
-    grade: '中2',
-    studentId,
-    name,
-    clearedCount: stats.totalCleared,
-    masteryRate: stats.masteryRate,
-    totalStars: stats.totalStars,
-    perfectCount: stats.perfectCount,
-    totalMistakes: stats.totalMistakes,
-    totalHints: stats.totalHints,
-    units: stats.units.map(u => ({ key: u.key, rate: u.rate, mistakes: u.mistakes }))
-  };
-
-  const statusEl = document.getElementById('sync-status-text');
-  if (statusEl) statusEl.textContent = '送信中...';
-
-  
-}
-
-);
 }
 
 function resetAllProgress() {
